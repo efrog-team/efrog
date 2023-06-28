@@ -1,0 +1,16 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/script.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    create task
+    <button onclick="GetServer()">Зв'язок з серевером</button>
+    <form action="https://test-server-qual-work.vercel.app/post-data" method="POST">
+        <label for="content">Содержимое:</label><br>
+        <textarea id="data" name="data" rows="1" required></textarea><br><br>
+        <input type="submit" value="Создать заметку">
+    </form>
+</body>
+</html>
