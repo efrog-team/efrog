@@ -1,21 +1,27 @@
 from dotenv import dotenv_values
-config = dotenv_values(".env")
+config: dict[str, str | None] = dotenv_values('.env')
 
 import os
-import mysql.connector
+from mysql.connector import MySQLConnection
+from mysql.connector.abstracts import MySQLConnectionAbstract, MySQLCursorAbstract
+from typing import TextIO
 
-def create_tables():
-    with mysql.connector.connect(
-        host=config["HOST"],
-        user=config["USERNAME"],
-        password=config["PASSWORD"],
-        database=config["DATABASE"]
+def create_tables() -> None:
+    connection: MySQLConnectionAbstract
+    with MySQLConnection(
+        host=config['HOST'],
+        user=config['USERNAME'],
+        password=config['PASSWORD'],
+        database=config['DATABASE']
     ) as connection:
-        with open(os.path.dirname(__file__).replace("\\", "/") + "/create_tables.sql", "r") as sql_file:
+        connection.autocommit = True
+        sql_file: TextIO
+        with open(os.path.dirname(__file__).replace('\\', '/') + '/create_tables.sql', 'r') as sql_file:
+            cursor: MySQLCursorAbstract
             with connection.cursor() as cursor:
-                statements = sql_file.read().split(";")
+                statements: list[str] = sql_file.read().split(';')
                 for statement in statements:
                     cursor.execute(statement)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     create_tables()
