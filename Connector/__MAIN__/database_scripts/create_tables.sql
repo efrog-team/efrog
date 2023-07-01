@@ -1,34 +1,19 @@
-from dotenv import dotenv_values
-import mysql.connector
-
-config = dotenv_values(".env")
-
-mydb = mysql.connector.connect(
-    host=config["HOST"],
-    user=config["USERNAME"],
-    password=config["PASSWORD"],
-    database=config["DATABASE"]
-)
-
-mydb.cursor().execute("""
 CREATE TABLE users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    username TEXT NOT NULL,
     email TEXT NOT NULL,
     name TEXT NOT NULL,
     password TEXT NOT NULL,
     PRIMARY KEY (id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE teams (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name TEXT NOT NULL,
+    individual BOOLEAN NOT NULL,
     PRIMARY KEY (id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE team_members (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     user_id BIGINT UNSIGNED NOT NULL,
@@ -36,10 +21,8 @@ CREATE TABLE team_members (
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (team_id) REFERENCES teams(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE competitions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     authors_user_id BIGINT UNSIGNED NOT NULL,
@@ -51,10 +34,8 @@ CREATE TABLE competitions (
     maximum_team_members_number TINYINT UNSIGNED NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (authors_user_id) REFERENCES users(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE competition_participants (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     competition_id BIGINT UNSIGNED NOT NULL,
@@ -63,10 +44,8 @@ CREATE TABLE competition_participants (
     PRIMARY KEY (id),
     FOREIGN KEY (competition_id) REFERENCES competitions(id),
     FOREIGN KEY (team_id) REFERENCES teams(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE problems (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     authors_user_id BIGINT UNSIGNED NOT NULL,
@@ -75,10 +54,8 @@ CREATE TABLE problems (
     private BOOLEAN NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (authors_user_id) REFERENCES users(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE competition_problems (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     problem_id BIGINT UNSIGNED NOT NULL,
@@ -86,10 +63,8 @@ CREATE TABLE competition_problems (
     PRIMARY KEY (id),
     FOREIGN KEY (problem_id) REFERENCES problems(id),
     FOREIGN KEY (competition_id) REFERENCES competitions(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE test_cases (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     problem_id BIGINT UNSIGNED NOT NULL,
@@ -100,10 +75,8 @@ CREATE TABLE test_cases (
     opened BOOLEAN NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (problem_id) REFERENCES problems(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE submissions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     authors_user_id BIGINT UNSIGNED NOT NULL,
@@ -113,10 +86,8 @@ CREATE TABLE submissions (
     PRIMARY KEY (id),
     FOREIGN KEY (authors_user_id) REFERENCES users(id),
     FOREIGN KEY (problem_id) REFERENCES problems(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE competition_submissions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     submission_id BIGINT UNSIGNED NOT NULL,
@@ -126,10 +97,8 @@ CREATE TABLE competition_submissions (
     FOREIGN KEY (submission_id) REFERENCES submissions(id),
     FOREIGN KEY (competition_id) REFERENCES competitions(id),
     FOREIGN KEY (team_id) REFERENCES teams(id)
-)
-""")
+);
 
-mydb.cursor().execute("""
 CREATE TABLE submission_results (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     submission_id BIGINT UNSIGNED NOT NULL,
@@ -142,5 +111,4 @@ CREATE TABLE submission_results (
     PRIMARY KEY (id),
     FOREIGN KEY (submission_id) REFERENCES submissions(id),
     FOREIGN KEY (test_case_id) REFERENCES test_cases(id)
-)
-""")
+);
