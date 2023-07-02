@@ -18,7 +18,7 @@ def create_tables() -> None:
         sql_file: TextIO
         with open(os.path.dirname(__file__).replace('\\', '/') + '/create_tables.sql', 'r') as sql_file:
             cursor: MySQLCursorAbstract
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 statements: list[str] = sql_file.read().split(';')
                 for statement in statements:
                     cursor.execute(statement)
