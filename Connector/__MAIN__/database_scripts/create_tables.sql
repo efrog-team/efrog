@@ -10,16 +10,19 @@ CREATE TABLE users (
 CREATE TABLE teams (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name TEXT NOT NULL,
+    owner_user_id BIGINT UNSIGNED NOT NULL,
     individual BOOLEAN NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_user_id) REFERENCES users(id)
 );
 
 CREATE TABLE team_members (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED NOT NULL,
+    member_user_id BIGINT UNSIGNED NOT NULL,
     team_id BIGINT UNSIGNED NOT NULL,
+    confirmed BOOLEAN NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (member_user_id) REFERENCES users(id),
     FOREIGN KEY (team_id) REFERENCES teams(id)
 );
 
