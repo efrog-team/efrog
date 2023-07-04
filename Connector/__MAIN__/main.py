@@ -1,16 +1,16 @@
 from fastapi import FastAPI, HTTPException
-from database.users_teams_members import add_user as add_user_db, get_user as get_user_db
-from database.users_teams_members import add_team as add_team_db
-from database.users_teams_members import add_team_memeber as add_team_memeber_db, get_team_members_by_team_name as get_team_members_db, confirm_team_member as confirm_team_member_db
+from database.users_teams_members import create_user as create_user_db, get_user as get_user_db
+from database.users_teams_members import create_team as create_team_db
+from database.users_teams_members import create_team_memeber as create_team_memeber_db, get_team_members_by_team_name as get_team_members_db, confirm_team_member as confirm_team_member_db
 from models import User, UserRequest, TeamRequest, TeamMemberRequest, ConfirmTeamMemberRequest
 from security.hash import hash_hex
 from security.jwt import encode_token
 
 app: FastAPI = FastAPI()
 
-@app.post("/add-user")
-def add_user(user: UserRequest) -> dict[str, str]:
-    add_user_db(user)
+@app.post("/create-user")
+def create_user(user: UserRequest) -> dict[str, str]:
+    create_user_db(user)
     return {}
     
 @app.get("/get-user")
@@ -35,14 +35,14 @@ def get_token(username: str = '', password: str = '') -> dict[str, str]:
     else:
         raise HTTPException(status_code=401, detail="Incorrect password")
 
-@app.post("/add-team")
-def add_team(team: TeamRequest) -> dict[str, str]:
-    add_team_db(team)
+@app.post("/create-team")
+def create_team(team: TeamRequest) -> dict[str, str]:
+    create_team_db(team)
     return {}
 
-@app.post("/add-team-member")
-def add_team_member(team_member: TeamMemberRequest) -> dict[str, str]:
-    add_team_memeber_db(team_member)
+@app.post("/create-team-member")
+def create_team_member(team_member: TeamMemberRequest) -> dict[str, str]:
+    create_team_memeber_db(team_member)
     return {}
 
 @app.get("/get-team-members")

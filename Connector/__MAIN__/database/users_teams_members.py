@@ -15,7 +15,7 @@ from security.jwt import decode_token
 
 # Users -------------------------------------------------------------------------------------------------------------------------------------------------
 
-def add_user(user: User | UserRequest) -> None:
+def create_user(user: User | UserRequest) -> None:
     connection: MySQLConnectionAbstract
     with MySQLConnection(
         host=config['HOST'],
@@ -33,7 +33,7 @@ def add_user(user: User | UserRequest) -> None:
                     cursor.execute(f"INSERT INTO users (username, email, name, password) VALUES ('{user.username}', '{user.email}', '{user.name}', '{hash_hex(user.password)}')")
                 res_user_id: int | None = cursor.lastrowid
                 if res_user_id is not None:
-                    add_team(Team(id=None, name=user.name, owner_user_id=res_user_id, individual=1))
+                    create_team(Team(id=None, name=user.name, owner_user_id=res_user_id, individual=1))
                 else:
                     raise HTTPException(status_code=500, detail="Internal error")
             else:
@@ -77,7 +77,7 @@ def get_and_check_user_by_jwt(token: str) -> User:
 
 # Teams -------------------------------------------------------------------------------------------------------------------------------------------------
 
-def add_team(team: Team | TeamRequest) -> None:
+def create_team(team: Team | TeamRequest) -> None:
     connection: MySQLConnectionAbstract
     with MySQLConnection(
         host=config['HOST'],
@@ -93,7 +93,7 @@ def add_team(team: Team | TeamRequest) -> None:
                         cursor.execute(f"INSERT INTO teams (name, owner_user_id, individual) VALUES ('{team.name}', '{team.owner_user_id}', {team.individual})")
                         res_team_id: int | None = cursor.lastrowid
                         if res_team_id is not None:
-                            add_team_memeber(TeamMember(id=None, member_user_id=team.owner_user_id, team_id=res_team_id, confirmed=1))
+                            create_team_memeber(TeamMember(id=None, member_user_id=team.owner_user_id, team_id=res_team_id, confirmed=1))
                         else:
                             raise HTTPException(status_code=500, detail="Internal error")
                     else:
@@ -105,7 +105,7 @@ def add_team(team: Team | TeamRequest) -> None:
                             cursor.execute(f"INSERT INTO teams (name, owner_user_id, individual) VALUES ('{team.name}', '{owner_user_id}', 0)")
                             res_team_id: int | None = cursor.lastrowid
                             if res_team_id is not None:
-                                add_team_memeber(TeamMember(id=None, member_user_id=owner_user_id, team_id=res_team_id, confirmed=1))
+                                create_team_memeber(TeamMember(id=None, member_user_id=owner_user_id, team_id=res_team_id, confirmed=1))
                             else:
                                 raise HTTPException(status_code=500, detail="Internal error")
                         else:
@@ -133,7 +133,7 @@ def get_team(id: int = -1, name: str = '', individual: int = -1) -> Team | None:
 
 # Team Members ------------------------------------------------------------------------------------------------------------------------------------------
 
-def add_team_memeber(team_memeber: TeamMember | TeamMemberRequest) -> None:
+def create_team_memeber(team_memeber: TeamMember | TeamMemberRequest) -> None:
     connection: MySQLConnectionAbstract
     with MySQLConnection(
         host=config['HOST'],

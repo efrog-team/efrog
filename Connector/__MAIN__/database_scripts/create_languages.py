@@ -9,7 +9,7 @@ languages: list[tuple[str, str]] = [
     ('C++ 17', 'g++ 11.2')
 ]
 
-def add_languages() -> None:
+def create_languages() -> None:
     connection: MySQLConnectionAbstract
     with MySQLConnection(
         host=config['HOST'],
@@ -24,4 +24,4 @@ def add_languages() -> None:
                 cursor.execute(f"INSERT INTO languages (name, version, supported) VALUES ('{language[0]}', '{language[1]}', 1)")
 
 if __name__ == '__main__':
-    add_languages()
+    create_languages()
