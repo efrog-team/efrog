@@ -80,15 +80,25 @@ CREATE TABLE test_cases (
     FOREIGN KEY (problem_id) REFERENCES problems(id)
 );
 
+CREATE TABLE languages (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
+    supported BOOLEAN NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE TABLE submissions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     authors_user_id BIGINT UNSIGNED NOT NULL,
     problem_id BIGINT UNSIGNED NOT NULL,
     code TEXT NOT NULL,
+    language_id BIGINT UNSIGNED NOT NULL,
     time_sent DATETIME NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (authors_user_id) REFERENCES users(id),
-    FOREIGN KEY (problem_id) REFERENCES problems(id)
+    FOREIGN KEY (problem_id) REFERENCES problems(id),
+    FOREIGN KEY (language_id) REFERENCES languages(id)
 );
 
 CREATE TABLE competition_submissions (
