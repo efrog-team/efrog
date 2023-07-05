@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header
-from database.users_teams_members import create_user as create_user_db, get_user as get_user_db
+from database.users_teams_members import create_user as create_user_db, get_user as get_user_db, get_and_check_user_by_token as get_user_by_token_db
 from database.users_teams_members import create_team as create_team_db
 from database.users_teams_members import create_team_memeber as create_team_memeber_db, get_team_members_by_team_name as get_team_members_db, confirm_team_member as confirm_team_member_db
 from models import User, UserRequest, UserToken, TeamRequest, TeamMemberRequest
@@ -13,18 +13,6 @@ app: FastAPI = FastAPI()
 def post_user(user: UserRequest) -> dict[str, str]:
     create_user_db(user)
     return {}
-    
-@app.get("/users/{username}")
-def get_user(username: str = '') -> dict[str, str]:
-    user_db: User | None = get_user_db(username=username)
-    if user_db is None:
-        raise HTTPException(status_code=401, detail="User does not exist")
-    else:
-        return {
-            'username': user_db.username,
-            'email': user_db.email,
-            'name': user_db.name
-        }
 
 @app.post("/token")
 def post_token(user: UserToken) -> dict[str, str]:
@@ -35,6 +23,30 @@ def post_token(user: UserToken) -> dict[str, str]:
         return {'token': encode_token(user.username, hash_hex(user.password))}
     else:
         raise HTTPException(status_code=401, detail="Incorrect password")
+
+@app.get("/users/me")
+def get_user_me(authorization: Annotated[str | None, Header()]) -> dict[str, str]:
+    if authorization is not None:
+        user_db: User | None = get_user_by_token_db(authorization)
+        return {
+            'username': user_db.username,
+            'email': user_db.email,
+            'name': user_db.name
+        }
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+@app.get("/users/{username}")
+def get_user(username: str) -> dict[str, str]:  
+    user_db: User | None = get_user_db(username=username)
+    if user_db is None:
+        raise HTTPException(status_code=401, detail="User does not exist")
+    else:
+        return {
+            'username': user_db.username,
+            'email': user_db.email,
+            'name': user_db.name
+        }
 
 @app.post("/teams")
 def post_team(team: TeamRequest, authorization: Annotated[str | None, Header()]) -> dict[str, str]:
