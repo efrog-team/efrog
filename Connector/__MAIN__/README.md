@@ -61,7 +61,7 @@
     * Response body:
         * empty
 
-* ### POST "/teams/{team_name}/team-members" — create a team memeber
+* ### POST "/teams/{team_name}/members" — create a team memeber
     * Request headers:
         * Authroization: string (access token)
     * Request parameters:
@@ -71,7 +71,7 @@
     * Response body:
         * empty
 
-* ### GET "/teams/{team_name}/team-members?only_comfirmed={only_comfirmed}" — create a team memeber
+* ### GET "/teams/{team_name}/members?only_comfirmed={only_comfirmed}" — create a team memeber
     * Request headers:
         * Authroization: string (access token)
     * Request parameters:
@@ -87,7 +87,7 @@
             * confirmed: boolean
             } ]
 
-* ### PUT "/teams/{team_name}/team-members/{team_member_username}/confirm" — confirm a team member
+* ### PUT "/teams/{team_name}/members/{team_member_username}/confirm" — confirm a team member
     * Request headers:
         * Authroization: string (access token)
     * Request parameters:

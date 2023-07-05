@@ -56,7 +56,7 @@ def post_team(team: TeamRequest, authorization: Annotated[str | None, Header()])
         raise HTTPException(status_code=401, detail="Invalid token")
     return {}
 
-@app.post("/teams/{team_name}/team-members")
+@app.post("/teams/{team_name}/members")
 def post_team_member(team_member: TeamMemberRequest, team_name: str, authorization: Annotated[str | None, Header()]) -> dict[str, str]:
     if authorization is not None:
         create_team_memeber_db(team_member, team_name, authorization)
@@ -64,7 +64,7 @@ def post_team_member(team_member: TeamMemberRequest, team_name: str, authorizati
         raise HTTPException(status_code=401, detail="Invalid token")
     return {}
 
-@app.get("/teams/{team_name}/team-members")
+@app.get("/teams/{team_name}/members")
 def get_team_members(team_name: str, only_confirmed: bool) -> dict[str, list[dict[str, str]]]:
     res: list[dict[str, str]] = []
     for team_member in get_team_members_db(team_name, only_confirmed):
@@ -78,7 +78,7 @@ def get_team_members(team_name: str, only_confirmed: bool) -> dict[str, list[dic
         'team_members': res
     }
 
-@app.put("/teams/{team_name}/team-members/{team_member_username}/confirm")
+@app.put("/teams/{team_name}/members/{team_member_username}/confirm")
 def put_confirm_team_member(team_name: str, team_member_username: str, authorization: Annotated[str | None, Header()]) -> dict[str, str]:
     if authorization is not None:
         confirm_team_member_db(team_name, team_member_username, authorization)
