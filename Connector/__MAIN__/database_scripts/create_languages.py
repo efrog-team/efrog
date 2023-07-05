@@ -1,8 +1,10 @@
-from dotenv import dotenv_values
-config: dict[str, str | None] = dotenv_values('.env')
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__).replace('\\', '/') + '/../')
 
 from mysql.connector import MySQLConnection
 from mysql.connector.abstracts import MySQLConnectionAbstract, MySQLCursorAbstract
+from config import database_config
 
 languages: list[tuple[str, str]] = [
     ('Python 3', '3.10'),
@@ -11,12 +13,7 @@ languages: list[tuple[str, str]] = [
 
 def create_languages() -> None:
     connection: MySQLConnectionAbstract
-    with MySQLConnection(
-        host=config['HOST'],
-        user=config['USERNAME'],
-        password=config['PASSWORD'],
-        database=config['DATABASE']
-    ) as connection:
+    with MySQLConnection(**database_config) as connection:
         connection.autocommit = True
         cursor: MySQLCursorAbstract
         with connection.cursor(dictionary=True) as cursor:

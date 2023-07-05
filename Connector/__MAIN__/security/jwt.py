@@ -1,9 +1,11 @@
-from dotenv import dotenv_values
-config: dict[str, str | None] = dotenv_values('.env')
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__).replace('\\', '/') + '/../')
 
 import jwt
 import datetime
 from typing import Any
+from config import config
 
 def encode_token(username: str, password: str) -> str:
     if config['JWT_SECRET'] is None:

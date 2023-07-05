@@ -2,15 +2,13 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__).replace('\\', '/') + '/../')
 
-from dotenv import dotenv_values
-config: dict[str, str | None] = dotenv_values('.env')
-
 from create_database import create_database
 from create_tables import create_tables
 from create_languages import create_languages
 from security.hash import hash_hex
 from database.users_teams_members import create_user
 from models import User
+from config import config
 
 def init_database() -> None:
     create_database()
