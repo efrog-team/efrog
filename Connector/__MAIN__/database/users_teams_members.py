@@ -13,24 +13,32 @@ from security.jwt import decode_token
 
 # Users -------------------------------------------------------------------------------------------------------------------------------------------------
 
+BLOCKED_USERNAMES = [
+    "admin",
+    "me"
+]
+
 def create_user(user: User | UserRequest) -> None:
     connection: MySQLConnectionAbstract
     with MySQLConnection(**database_config) as connection:
         connection.autocommit = True
         cursor: MySQLCursorAbstract
         with connection.cursor(dictionary=True) as cursor:
-            if get_user(username=user.username, email=user.email) is None:
-                if isinstance(user, User):
-                    cursor.execute(f"INSERT INTO users (username, email, name, password) VALUES ('{user.username}', '{user.email}', '{user.name}', '{user.password}')")
+            if user.username not in BLOCKED_USERNAMES:
+                if get_user(username=user.username, email=user.email) is None:
+                    if isinstance(user, User):
+                        cursor.execute(f"INSERT INTO users (username, email, name, password) VALUES ('{user.username}', '{user.email}', '{user.name}', '{user.password}')")
+                    else:
+                        cursor.execute(f"INSERT INTO users (username, email, name, password) VALUES ('{user.username}', '{user.email}', '{user.name}', '{hash_hex(user.password)}')")
+                    res_user_id: int | None = cursor.lastrowid
+                    if res_user_id is not None:
+                        create_team(Team(id=None, name=user.name, owner_user_id=res_user_id, individual=1))
+                    else:
+                        raise HTTPException(status_code=500, detail="Internal error")
                 else:
-                    cursor.execute(f"INSERT INTO users (username, email, name, password) VALUES ('{user.username}', '{user.email}', '{user.name}', '{hash_hex(user.password)}')")
-                res_user_id: int | None = cursor.lastrowid
-                if res_user_id is not None:
-                    create_team(Team(id=None, name=user.name, owner_user_id=res_user_id, individual=1))
-                else:
-                    raise HTTPException(status_code=500, detail="Internal error")
+                    raise HTTPException(status_code=409, detail="User already exists")
             else:
-                raise HTTPException(status_code=409, detail="User already exists")
+                raise HTTPException(status_code=409, detail="Username is blocked")
 
 def get_user(id: int = -1, username: str = '', email: str = '') -> User | None:
     connection: MySQLConnectionAbstract
