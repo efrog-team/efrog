@@ -54,8 +54,9 @@ def get_user(id: int = -1, username: str = '', email: str = '') -> User | None:
 
 def get_and_check_user_by_token(token: str) -> User:
     try:
-        username: str | None = decode_token(token)['username']
-        password: str | None = decode_token(token)['password']
+        decoded_toke: dict[str, str | None] = decode_token(token)
+        username: str | None = decoded_toke['username']
+        password: str | None = decoded_toke['password']
     except:
         raise HTTPException(status_code=401, detail="Invalid token")
     if username is not None:
