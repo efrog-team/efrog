@@ -1,4 +1,20 @@
 <script>
+    let socket = new WebSocket("//");
+
+    // sent message
+    document.forms.publish.onsubmit = function() {
+        let outgoingMessage = this.message.value;
+        socket.send(outgoingMessage);
+        return false;
+    };
+    
+    // get answer
+    socket.onmessage = function(event) {
+        let message = event.data;
+        let messageElem = document.createElement('div');
+        messageElem.textContent = message;
+        document.getElementById('answer').prepend(messageElem);
+    }
 </script>
 
 <style>
@@ -66,10 +82,13 @@
             </div>
         </div>
         <div class="main">
-            <h1><a href="\Task">Тестове завдання</a></h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac ante egestas, consequat nulla at, aliquam urna. Morbi dapibus hendrerit sagittis. Donec egestas quam in porta semper. Nullam interdum venenatis dolor, at laoreet metus lobortis et. Interdum et malesuada fames ac ante ipsum primis in faucibus. Fusce viverra venenatis sapien sed placerat. Integer est metus, hendrerit ut urna eget, commodo accumsan lectus. </p>
-            <p>Praesent a tincidunt eros, et dignissim eros. Nullam ut elit in nisl vulputate cursus. Suspendisse ornare magna a justo lacinia, a luctus felis fringilla. Aliquam et enim aliquam tortor ultrices sollicitudin dapibus at velit. Integer vestibulum ligula eu diam fringilla, sit amet ultrices quam vulputate. Cras suscipit auctor felis sed fringilla.</p>
-            <p>Aenean convallis est sem, sed iaculis nisi fermentum ac. Aliquam eleifend fringilla diam, vel luctus ipsum feugiat eu. Aenean vestibulum nec nisi non faucibus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec ut lacus ac eros rutrum pellentesque a non diam. Praesent a est sed est cursus iaculis. Cras tincidunt tincidunt massa non cursus. Proin consequat orci vitae risus feugiat porta. Integer sed lectus accumsan.</p>
+            <h1>Тестове завдання</h1>
+            <p>Умова завдання: Напишіть функцію, що рахує квадрат числа</p>
+            <form>
+                <textarea type="text" name="message" cols="30" rows="10"></textarea>
+                <input type="submit" value="Відправити">
+            </form>
+            <div id="answer">Відповідь сервера</div>
         </div>
     </div>
 </main>
