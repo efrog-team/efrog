@@ -2,12 +2,6 @@
 </script>
 
 <style>
-    @font-face {
-	font-family: "Consolas"; 
-	src: url("C:\Work\my-app\static\fonts\Consolas\consolas") format("truetype"); 
-	font-style: normal; 
-	font-weight: normal; 
-    }
     .content{
         background-color: rgb(23, 22, 27);
         margin: 0px;
@@ -21,14 +15,14 @@
     .header_text{
         color: white;
         font-size: 48px;
-        font-family: "Consolas";
+        font-family: "e-Ukraine";
         font-weight: bold;
         display: inline;
     }
     .menu_text{
         color: white;
         font-size: 20px;
-        font-family: "Consolas";
+        font-family: "e-Ukraine";
 		text-align:right;
         text-decoration: none;   
         display: inline;
@@ -44,6 +38,7 @@
         color: white;
         font-size: 20px;
         margin: 50px;
+        font-family: "e-Ukraine";
 
     }
 </style>

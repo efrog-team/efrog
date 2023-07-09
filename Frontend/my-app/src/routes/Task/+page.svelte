@@ -1,26 +1,33 @@
 <script>
+    import { onMount } from 'svelte';
     let socket = new WebSocket("//");
 
     // sent message
-    document.forms.publish.onsubmit = function() {
-        let outgoingMessage = this.message.value;
-        socket.send(outgoingMessage);
-        return false;
-    };
+    onMount(async () => {
+        document.forms.publish.onsubmit = function() {
+            let outgoingMessage = this.message.value;
+            socket.send(outgoingMessage);
+            return false;
+        };
+    });
+
     
     // get answer
-    socket.onmessage = function(event) {
-        let message = event.data;
-        let messageElem = document.createElement('div');
-        messageElem.textContent = message;
-        document.getElementById('answer').prepend(messageElem);
+    onMount(async () =>{
+        socket.onmessage = function(event) {
+            let message = event.data;
+            let messageElem = document.createElement('div');
+            messageElem.textContent = message;
+            document.getElementById('answer').prepend(messageElem);
     }
+    });
+
 </script>
 
 <style>
     @font-face {
-	font-family: "Consolas"; 
-	src: url("C:\Work\my-app\static\fonts\Consolas\consolas") format("truetype"); 
+	font-family: "e-Ukraine"; 
+	src: url("C:\Work\my-app\static\fonts\e-Ukraine\e-Ukraine-Light") format("truetype"); 
 	font-style: normal; 
 	font-weight: normal; 
     }
@@ -37,14 +44,14 @@
     .header_text{
         color: white;
         font-size: 48px;
-        font-family: "Consolas";
+        font-family: "e-Ukraine";
         font-weight: bold;
         display: inline;
     }
     .menu_text{
         color: white;
         font-size: 20px;
-        font-family: "Consolas";
+        font-family: "e-Ukraine";
 		text-align:right;
         text-decoration: none;   
         display: inline;
