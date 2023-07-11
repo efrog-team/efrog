@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-int DEBUG = 0;
+int DEBUG = 1;
 
 int create_files(int submission_id, char *code, char *language) {
 
@@ -91,9 +91,10 @@ struct Result
     char *description;
 };
 
-struct Result check_test_case(int submission_id, int test_case_id, char *language, char *input, char *solution) {
+struct Result *check_test_case(int submission_id, int test_case_id, char *language, char *input, char *solution) {
 
-    
+    struct Result *result = malloc(sizeof(struct Result));
+
     char output[1000000] = "";
 
     const int path_length = 13 + (int)((ceil(log10(submission_id)) + 1));
@@ -114,7 +115,11 @@ struct Result check_test_case(int submission_id, int test_case_id, char *languag
     if (file_input == NULL) {
 
         if(DEBUG) printf("file_input = NULL\n");
-        struct Result result = {6, 0, 0, "", ""}; //6 - internal error
+        result->status = 6;
+        result->time = 0;
+        result->memory = 0;
+        result->output = "";
+        result->description = "";
         return result;
         
     }
@@ -127,7 +132,11 @@ struct Result check_test_case(int submission_id, int test_case_id, char *languag
     if (file_solution == NULL) {
 
         if(DEBUG) printf("file_solution = NULL\n");
-        struct Result result = {6, 0, 0, "", ""}; //6 - internal error
+        result->status = 6;
+        result->time = 0;
+        result->memory = 0;
+        result->output = "";
+        result->description = "";
         return result;
 
     }
@@ -151,7 +160,11 @@ struct Result check_test_case(int submission_id, int test_case_id, char *languag
     } else {
 
         if (DEBUG) printf("unknown language");
-        struct Result result = {6, 0, 0, "", ""}; //6 - internal error
+        result->status = 6;
+        result->time = 0;
+        result->memory = 0;
+        result->output = "";
+        result->description = "";
         return result;
 
     }
@@ -222,27 +235,25 @@ struct Result check_test_case(int submission_id, int test_case_id, char *languag
     fclose(file_solution);      
     pclose(file_output);
 
-    struct Result result = {status, 0, 0, output, ""};
-    // result.status = status;
-    // result.time = 10; //random
-    // result.memory = 10; //random
-    // result.output = output;
-    // result.description = "";
+    result->status = status;
+    result->time = 0;
+    result->memory = 0;
+    result->output = output;
+    result->description = "";
 
     return result;
-      
-}      
-      
+    
+}
       
 int main() {
 
     DEBUG = 1;
 
     create_files(12312365, "print(int(input()) ** 2)", "Python 3 (3.10)");
-    struct Result result = check_test_case(12312365, 123123, "Python 3 (3.10)", "2", "4");
+    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "2", "4");
     delete_files(12312365);
 
-    printf("status: %d\noutput: %s", result.status, result.output);
+    printf("status: %d\noutput: %s", result->status, result->output);
     return 0;
 
 }
