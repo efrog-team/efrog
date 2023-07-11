@@ -11,6 +11,7 @@ CREATE TABLE teams (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name TEXT NOT NULL,
     owner_user_id BIGINT UNSIGNED NOT NULL,
+    active BOOLEAN NOT NULL,
     individual BOOLEAN NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (owner_user_id) REFERENCES users(id)
@@ -28,7 +29,7 @@ CREATE TABLE team_members (
 
 CREATE TABLE competitions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    authors_user_id BIGINT UNSIGNED NOT NULL,
+    author_user_id BIGINT UNSIGNED NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     start_time DATETIME NOT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE competitions (
     private BOOLEAN NOT NULL,
     maximum_team_members_number TINYINT UNSIGNED NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (authors_user_id) REFERENCES users(id)
+    FOREIGN KEY (author_user_id) REFERENCES users(id)
 );
 
 CREATE TABLE competition_participants (
@@ -51,12 +52,12 @@ CREATE TABLE competition_participants (
 
 CREATE TABLE problems (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    authors_user_id BIGINT UNSIGNED NOT NULL,
+    author_user_id BIGINT UNSIGNED NOT NULL,
     name TEXT NOT NULL,
     statement TEXT NOT NULL,
     private BOOLEAN NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (authors_user_id) REFERENCES users(id)
+    FOREIGN KEY (author_user_id) REFERENCES users(id)
 );
 
 CREATE TABLE competition_problems (
@@ -90,13 +91,13 @@ CREATE TABLE languages (
 
 CREATE TABLE submissions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    authors_user_id BIGINT UNSIGNED NOT NULL,
+    author_user_id BIGINT UNSIGNED NOT NULL,
     problem_id BIGINT UNSIGNED NOT NULL,
     code TEXT NOT NULL,
     language_id BIGINT UNSIGNED NOT NULL,
     time_sent DATETIME NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (authors_user_id) REFERENCES users(id),
+    FOREIGN KEY (author_user_id) REFERENCES users(id),
     FOREIGN KEY (problem_id) REFERENCES problems(id),
     FOREIGN KEY (language_id) REFERENCES languages(id)
 );
