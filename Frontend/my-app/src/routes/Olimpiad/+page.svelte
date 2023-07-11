@@ -2,39 +2,6 @@
 </script>
 
 <style>
-    .content{
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        width: max-content;
-    }
-
-    ul.menu {
-        margin:0;
-        padding:0;
-        overflow: hidden;
-        text-align: center;
-    }
-
-    ul.menu a{
-        display: inline-block;
-        position: relative;
-        color: rgb(0, 0, 0); 
-        background: rgb(142, 142, 150); 
-        text-decoration: none;
-        letter-spacing: 1px; 
-        height: 2em; 
-        
-    }
-
-    ul.menu li{
-        display:inline;
-        float: left;
-        border: 2px solid black;
-        width: 200px;
-        text-align: center;
-    }
-
 </style>
 
 <svelte:head>
@@ -42,16 +9,23 @@
 </svelte:head>
 
 <main>
-    <div id="content" class="content">   
-        <h1 class="header">Олімпіади</h1>
-        <ul class="menu">
-            <li><a href="\">Головна</a></li>
-            <li><a href="\FindingTasks">Пошук задач</a></li>
-            <li><a href="\Olimpiad">Олімпіади</a></li>
-            <li><a href="\CreateTask">Створити задачу</a></li>
-            <li><a href="\CreateOlimpiad">Створити олімпіаду</a></li>
-            <li><a href="\ForCouthes">Для коучів</a></li>
-            <li><a href="\ForUsers">Для учасників</a></li>
-        </ul>
+    <div class="content">
+        <div id="header" class="header">
+            <div style="display: inline; float:left; margin-top: 6px; margin-left: 15px;"><a href="\main"><img src="logo.png" class="menu_photo" alt=" "></a></div>
+            <div style="display: inline; float:right; margin-top: 6px;"><a href="\user"><img src="favicon.png" class="menu_photo" alt=" "></a></div>
+            <div style="display: inline; float:right; margin-top: 50px;">   
+                <a href="\finding-task" class="menu_text">Задачі</a>
+                <a href="\olimpiad" class="menu_text">Олімпіади</a>
+            </div>
+        </div>
+        <div class="main">
+            <h1>Актуальні олімпіади, у яких можна взяти учать або створити свою</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac ante egestas, consequat nulla at, aliquam urna. Morbi dapibus hendrerit sagittis. Donec egestas quam in porta semper. Nullam interdum venenatis dolor, at laoreet metus lobortis et. Interdum et malesuada fames ac ante ipsum primis in faucibus. Fusce viverra venenatis sapien sed placerat. Integer est metus, hendrerit ut urna eget, commodo accumsan lectus. </p>
+            <p>Praesent a tincidunt eros, et dignissim eros. Nullam ut elit in nisl vulputate cursus. Suspendisse ornare magna a justo lacinia, a luctus felis fringilla. Aliquam et enim aliquam tortor ultrices sollicitudin dapibus at velit. Integer vestibulum ligula eu diam fringilla, sit amet ultrices quam vulputate. Cras suscipit auctor felis sed fringilla.</p>
+            <p>Aenean convallis est sem, sed iaculis nisi fermentum ac. Aliquam eleifend fringilla diam, vel luctus ipsum feugiat eu. Aenean vestibulum nec nisi non faucibus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec ut lacus ac eros rutrum pellentesque a non diam. Praesent a est sed est cursus iaculis. Cras tincidunt tincidunt massa non cursus. Proin consequat orci vitae risus feugiat porta. Integer sed lectus accumsan.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac ante egestas, consequat nulla at, aliquam urna. Morbi dapibus hendrerit sagittis. Donec egestas quam in porta semper. Nullam interdum venenatis dolor, at laoreet metus lobortis et. Interdum et malesuada fames ac ante ipsum primis in faucibus. Fusce viverra venenatis sapien sed placerat. Integer est metus, hendrerit ut urna eget, commodo accumsan lectus. </p>
+            <p>Praesent a tincidunt eros, et dignissim eros. Nullam ut elit in nisl vulputate cursus. Suspendisse ornare magna a justo lacinia, a luctus felis fringilla. Aliquam et enim aliquam tortor ultrices sollicitudin dapibus at velit. Integer vestibulum ligula eu diam fringilla, sit amet ultrices quam vulputate. Cras suscipit auctor felis sed fringilla.</p>
+            <p>Aenean convallis est sem, sed iaculis nisi fermentum ac. Aliquam eleifend fringilla diam, vel luctus ipsum feugiat eu. Aenean vestibulum nec nisi non faucibus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec ut lacus ac eros rutrum pellentesque a non diam. Praesent a est sed est cursus iaculis. Cras tincidunt tincidunt massa non cursus. Proin consequat orci vitae risus feugiat porta. Integer sed lectus accumsan.</p>
+        </div>
     </div>
 </main>
