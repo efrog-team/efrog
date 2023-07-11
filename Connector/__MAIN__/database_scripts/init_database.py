@@ -15,7 +15,7 @@ def init_database() -> None:
     create_tables()
     create_languages()
     if not (config['USERNAME'] is None or config['EMAIL'] is None or config['PASSWORD'] is None):
-        create_user(User(id=None, username=config['USERNAME'], email=config['EMAIL'], name=config['USERNAME'], password=hash_hex(config['PASSWORD'])))
+        create_user(User(id=-1, username=config['USERNAME'], email=config['EMAIL'], name=config['USERNAME'], password=hash_hex(config['PASSWORD'])))
 
 if __name__ == '__main__':
     if input("Password: ") == config['PASSWORD']:
