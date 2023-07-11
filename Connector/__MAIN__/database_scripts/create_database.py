@@ -12,7 +12,7 @@ def create_database() -> None:
         connection.autocommit = True
         cursor: MySQLCursorAbstract
         with connection.cursor(dictionary=True) as cursor:
-            cursor.execute(f"DROP DATABASE IF EXISTS {database_config['databse']}")
+            cursor.execute(f"DROP DATABASE IF EXISTS {database_config['database']}")
             cursor.execute(f"CREATE DATABASE {database_config['database']}")
 
 if __name__ == '__main__':
