@@ -1,27 +1,4 @@
 <script>
-    import { onMount } from 'svelte';
-    let socket = new WebSocket("//");
-
-    // sent message
-    onMount(async () => {
-        document.forms.publish.onsubmit = function() {
-            let outgoingMessage = this.message.value;
-            socket.send(outgoingMessage);
-            return false;
-        };
-    });
-
-    
-    // get answer
-    onMount(async () =>{
-        socket.onmessage = function(event) {
-            let message = event.data;
-            let messageElem = document.createElement('div');
-            messageElem.textContent = message;
-            document.getElementById('answer').prepend(messageElem);
-    }
-    });
-
 </script>
 
 <style>
@@ -91,11 +68,27 @@
         <div class="main">
             <h1>Тестове завдання</h1>
             <p>Умова завдання: Напишіть функцію, що рахує квадрат числа</p>
-            <form>
-                <textarea type="text" name="message" cols="30" rows="10"></textarea>
-                <input type="submit" value="Відправити">
+            <form on:submit={() => {
+                let socket = new WebSocket("ws://localhost:8000/task");
+                socket.onopen = function() {
+                    socket.send(document.getElementById("message").value);
+                    document.getElementById('submit').disabled = true;
+                    document.getElementById('answer').innerHTML = 'Відповідь сервера:';
+                };
+                socket.onmessage = function(event) {
+                    let message = event.data;
+                    let messageElem = document.createElement('div');
+                    messageElem.textContent = message;
+                    document.getElementById('answer').append(messageElem);
+                };
+                socket.onclose = function() {
+                    document.getElementById('submit').disabled = false;
+                };
+            }}>
+                <textarea type="text" name="message" id="message" cols="30" rows="10" value="print(int(input()) ** 2)"></textarea>
+                <input type="submit" id="submit" value="Відправити">
             </form>
-            <div id="answer">Відповідь сервера</div>
+            <div id="answer">Відповідь сервера:</div>
         </div>
     </div>
 </main>

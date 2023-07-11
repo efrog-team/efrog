@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Header, WebSocket
+from fastapi.concurrency import run_in_threadpool
 from database.users_teams_members import create_user as create_user_db, get_user as get_user_db, get_and_check_user_by_token as get_user_by_token_db, update_user as update_user_db
 from database.users_teams_members import create_team as create_team_db, activate_deactivate_team as activate_deactivate_team_db, check_if_team_can_be_deleted as check_if_team_can_be_deleted_db, delete_team as delete_team_db
 from database.users_teams_members import create_team_memeber as create_team_memeber_db, get_team_members_by_team_name as get_team_members_db, confirm_team_member as confirm_team_member_db
@@ -8,8 +9,13 @@ from models import User, UserRequest, UserToken, UserRequestUpdate, TeamRequest,
 from security.hash import hash_hex
 from security.jwt import encode_token
 from typing import Annotated
+from checker_connection import compile_lib, get_lib
+from ctypes import CDLL
 
 app: FastAPI = FastAPI()
+
+compile_lib()
+lib: CDLL = get_lib()
 
 @app.post("/users")
 def post_user(user: UserRequest) -> dict[str, str]:
@@ -267,3 +273,40 @@ def delete_test_case(problem_id: int, test_case_id: int, authorization: Annotate
     else:
         raise HTTPException(status_code=401, detail="Invalid token")
     return {}
+
+@app.websocket("/task")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    await websocket.send_text(f"Your request is recieved")
+    submission_id: int = 1
+    code: str = await websocket.receive_text()
+    language: str = "Python 3 (3.10)"
+    if await run_in_threadpool(lib.create_files, submission_id, code.encode('utf-8'), language.encode('utf-8')) == 0:
+        await websocket.send_text(f"Compiled or saved succesfully")
+        test_cases: list[tuple[str, str]] = [
+            ('1', '1'),
+            ('2', '4'),
+            ('3', '9'),
+            ('4', '16'),
+            ('1000', '1000000'),
+            ('1000000', '1000000000000')
+        ]
+        count: int = 1
+        correct: int = 0
+        for test_case in test_cases:
+            match (await run_in_threadpool(lib.check_test_case, submission_id, count, language.encode('utf-8'), test_case[0].encode('utf-8'), test_case[1].encode('utf-8'))).contents.status:
+                case 0:
+                    await websocket.send_text(f"Test case #{count}: Correct answer")
+                    correct += 1
+                case 1:
+                    await websocket.send_text(f"Test case #{count}: Wrong answer")
+                case 6:
+                    await websocket.send_text(f"Test case #{count}: Internal error")
+                case _:
+                    await websocket.send_text(f"Test case #{count}: Unexpected error")
+            count += 1
+        await websocket.send_text(f"Total result: {correct}/{count - 1}")
+        await run_in_threadpool(lib.delete_files, submission_id)
+    else:
+        await websocket.send_text(f"Error in compilation or file creating occured")
+    await websocket.close()
