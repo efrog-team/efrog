@@ -4,7 +4,7 @@ services:
         container_name: mysql
         build:
             context: ../mysql-dev
-            dockerfile: ../mysql-dev/Dockerfile
+            dockerfile: ./Dockerfile
         ports:
             - "3306:3306"
         environment:
@@ -17,9 +17,6 @@ services:
             retries: 1000
     app:
         container_name: back-end
-        depends_on:
-            db:
-                condition: service_healthy
         build:
             context: ../../
             dockerfile: ./Containers/back-end-dev/Dockerfile
@@ -28,3 +25,8 @@ services:
             - DB_PORT=3306
         ports:
             - "8000:8000"
+        depends_on:
+            db:
+                condition: service_healthy
+        links:
+          - db

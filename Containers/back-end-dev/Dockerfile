@@ -9,13 +9,15 @@ RUN apt-get -y install g++-11
 RUN apt-get -y install python3
 RUN apt-get -y install python3-pip
 
+COPY Connector/__MAIN__/requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt
+
 COPY Connector/__MAIN__ Connector/__MAIN__
 
 COPY Checker Checker
 
 WORKDIR /Connector/__MAIN__
-
-RUN pip install -r requirements.txt
 
 EXPOSE 8000
 EXPOSE 3306
