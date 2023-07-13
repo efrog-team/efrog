@@ -4,7 +4,7 @@ import os
 def compile_lib() -> None:
     if not os.path.exists(os.path.dirname(__file__).replace('\\', '/') + "/checker_files"):
         os.mkdir(os.path.dirname(__file__).replace('\\', '/') + "/checker_files")
-    os.system("gcc -fPIC -shared -o checker_main.so ../../Checker/main.c")
+    os.system("gcc-11 -fPIC -shared -o checker_main.so ../../Checker/main.c")
 
 class Result(Structure):
     _fields_ = [('status', c_int),

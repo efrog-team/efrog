@@ -17,6 +17,10 @@ app: FastAPI = FastAPI()
 compile_lib()
 lib: CDLL = get_lib()
 
+@app.get("/")
+def root() -> str:
+    return 'This is a root endpoint of the API'
+
 @app.post("/users")
 def post_user(user: UserRequest) -> dict[str, str]:
     create_user_db(user)
