@@ -9,12 +9,22 @@ services:
             - "3306:3306"
         environment:
             MYSQL_ROOT_PASSWORD: root
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+            start_period: 3s
+            interval: 1s
+            timeout: 1s
+            retries: 1000
     app:
         container_name: back-end
-        links:
-            - "db"
+        depends_on:
+            db:
+                condition: service_healthy
         build:
             context: ../../
             dockerfile: ./Containers/back-end-dev/Dockerfile
+        environment:
+            - DB_HOST=mysql
+            - DB_PORT=3306
         ports:
             - "8000:8000"
