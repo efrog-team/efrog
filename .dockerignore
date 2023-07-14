@@ -1,0 +1,7 @@
+Connector/__MAIN__/__pycache__
+Connector/__MAIN__/*/__pycache__
+Connector/__MAIN__/env
+Connector/__MAIN__/checker_files
+Connector/__MAIN__/*.so
+Connector/__MAIN__/.gitignore
+Checker/.gitignore

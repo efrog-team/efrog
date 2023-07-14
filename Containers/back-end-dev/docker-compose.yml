@@ -1,7 +1,7 @@
 version: "3"
 services:
     db:
-        container_name: mysql
+        container_name: back-end-dev-db
         build:
             context: ../mysql-dev
             dockerfile: ./Dockerfile
@@ -16,12 +16,12 @@ services:
             timeout: 1s
             retries: 1000
     app:
-        container_name: back-end
+        container_name: back-end-dev-app
         build:
             context: ../../
             dockerfile: ./Containers/back-end-dev/Dockerfile
         environment:
-            - DB_HOST=mysql
+            - DB_HOST=back-end-dev-db
             - DB_PORT=3306
         ports:
             - "8000:8000"
