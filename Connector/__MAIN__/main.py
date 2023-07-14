@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
 from database.users_teams_members import create_user as create_user_db, get_user as get_user_db, get_and_check_user_by_token as get_user_by_token_db, update_user as update_user_db
 from database.users_teams_members import create_team as create_team_db, activate_deactivate_team as activate_deactivate_team_db, check_if_team_can_be_deleted as check_if_team_can_be_deleted_db, delete_team as delete_team_db
@@ -13,6 +14,14 @@ from checker_connection import compile_lib, get_lib
 from ctypes import CDLL
 
 app: FastAPI = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 compile_lib()
 lib: CDLL = get_lib()
