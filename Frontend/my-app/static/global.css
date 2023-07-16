@@ -14,18 +14,19 @@
 body{
     padding: 0;
     margin: 0;
+    background-color: rgb(41, 44, 51);
 }
 
 .content{
-    background-color: rgb(34, 35, 39);
+    background-color: rgb(41, 44, 51);
     margin: 0px;
     padding-bottom: 50px;
     min-height: 100vh;
 }
 
 .header{
-    background-color: rgb(26, 95, 35);
-    border-bottom: 5px solid rgb(12, 68, 19);
+    background-color: rgb(33, 121, 45);
+    border-bottom: 5px solid rgb(20, 55, 27);
     height: 112px;
 }
 
@@ -46,9 +47,8 @@ body{
 }
 
 .main{
-    background-color: rgb(34, 35, 39);
-    border: 5px solid rgb(12, 68, 19);
-    border-radius: 5px;
+    background-color: rgb(41, 44, 51);
+    border: 5px solid rgb(33, 121, 45);
     color: white;
     font-size: 20px;
     margin: 50px;
