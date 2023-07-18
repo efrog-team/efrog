@@ -2,11 +2,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h> 
 #include <math.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 int DEBUG = 1;
 
@@ -29,20 +30,44 @@ int create_files(int submission_id, char *code, char *language) {
     
     if (strcmp(language, "Python 3 (3.10)") == 0) {
 
-        char code_path[2 * path_length - 10]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
+        char code_path[path_length + (int)((ceil(log10(submission_id)) + 1)) + 4]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
         sprintf(code_path, "%s/%d.py", path, submission_id);
 
         file_code = fopen(code_path, "w");
 
-            if (file_code == NULL) {
+        if (file_code == NULL) {
 
-                if(DEBUG) printf("file_code = NULL\n");
-                return 1;
+            if(DEBUG) printf("file_code = NULL\n");
+            return 1;
 
-            }
+        }
 
-            fprintf(file_code, "%s", code);
-            fclose(file_code);
+        fprintf(file_code, "%s", code);
+        fclose(file_code);
+
+    } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) { //cpp and c
+        bool cpp = strcmp(language, "C++ 17 (g++ 11.2)") == 0; //c++
+        int code_path_length = path_length + (int)((ceil(log10(submission_id)) + 1)) + 5;
+        char code_path[code_path_length]; 
+        sprintf(code_path, cpp ? "%s/%d.cpp" : "%s/%d.c", path, submission_id);
+        file_code = fopen(code_path, "w");
+
+        if (file_code == NULL) {
+
+            if(DEBUG) printf("file_code = NULL\n");
+            return 1;
+
+        }
+
+        fprintf(file_code, "%s", code);
+        fclose(file_code);
+
+        char compile_command[11 +  2 * code_path_length]; //g++-11 main.cpp -o main len : 7 +  2 * code_path_length
+        sprintf(compile_command, cpp ? "g++-11 %s -o %s/%d" : "gcc-11 %s -lm -o %s/%d", code_path, path, submission_id); 
+        int status = system(compile_command); 
+        if (status == 1) { 
+            if (DEBUG) printf("failed to compile (cpp)\n");
+        }
 
     } else {
 
@@ -149,13 +174,27 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
 
         int command_status;
 
-        char code_path[2 * path_length - 10]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
+        char code_path[path_length + (int)((ceil(log10(submission_id)) + 1)) + 4]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
         
         char command[2 * path_length + testpath_input_length - 2]; 
         sprintf(command, "python3 %s < %s", code_path, testpath_input);
 
         file_output = popen(command, "r");
+
+    } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) {
+
+        int command_status;
+        int code_path_length = path_length + (int)((ceil(log10(submission_id)) + 1)) + 1; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 1 :(/) :)))))))))))))))))))))))))))))))))
+
+        char code_path[code_path_length]; 
+        sprintf(code_path, "checker_files/%d/%d", submission_id, submission_id);
+
+        char command[code_path_length + testpath_input_length + 3]; 
+        sprintf(command, "%s < %s", code_path, testpath_input);
+
+        file_output = popen(command, "r");
+
 
     } else {
 
@@ -250,10 +289,13 @@ int main() {
     DEBUG = 1;
 
     create_files(12312365, "print(int(input()) ** 2)", "Python 3 (3.10)");
-    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "2", "4");
+    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "20", "400");
     delete_files(12312365);
 
     printf("status: %d\noutput: %s", result->status, result->output);
     return 0;
 
 }
+
+
+
