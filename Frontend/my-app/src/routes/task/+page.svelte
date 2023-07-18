@@ -1,4 +1,19 @@
 <script>
+    import { onMount } from "svelte";
+
+    function sample() {
+        if (document.getElementById('language').value == 'Python 3 (3.10)') {
+            document.getElementById('code').value = 'print(int(input()))';
+        }
+        else if (document.getElementById('language').value == 'C++ 17 (g++ 11.2)') {
+            document.getElementById('code').value = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}';
+        }
+        else if (document.getElementById('language').value == 'C 17 (gcc 11.2)') {
+            document.getElementById('code').value = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("%lld", &a);\n    printf("%lld", a * a);\n}';
+        }
+    }
+
+    onMount(() => sample());
 </script>
 
 <style>
@@ -38,8 +53,8 @@
                     document.getElementById('submit').disabled = false;
                 };
             }}>
-                <textarea type="text" name="code" id="code" cols="30" rows="10" value="print(int(input()) ** 2)"></textarea><br>
-                <select name="language" id="language">
+                <textarea type="text" name="code" id="code" cols="30" rows="10"></textarea><br>
+                <select name="language" id="language" on:change={sample}>
                     <option value="Python 3 (3.10)">Python 3 (3.10)</option>
                     <option value="C++ 17 (g++ 11.2)">C++ 17 (g++ 11.2)</option>
                     <option value="C 17 (gcc 11.2)">C 17 (gcc 11.2)</option>
