@@ -12,6 +12,7 @@ from security.jwt import encode_token
 from typing import Annotated
 from checker_connection import compile_lib, get_lib
 from ctypes import CDLL
+import os
 
 app: FastAPI = FastAPI()
 
@@ -290,12 +291,14 @@ def delete_test_case(problem_id: int, test_case_id: int, authorization: Annotate
 @app.websocket("/task")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text(f"Your request is recieved")
     submission_id: int = 1
     code: str = await websocket.receive_text()
-    language: str = "Python 3 (3.10)"
+    language: str = await websocket.receive_text()
+    await websocket.send_text(f"Your request is recieved")
     if await run_in_threadpool(lib.create_files, submission_id, code.encode('utf-8'), language.encode('utf-8')) == 0:
-        await websocket.send_text(f"Compiled or saved succesfully")
+        await websocket.send_text(f"Saved succesfully")
+        if language == 'C++ 17 (g++ 11.2)' or language == 'C 17 (gcc 11.2)':
+            await websocket.send_text(f"Compiled succesfully")
         test_cases: list[tuple[str, str]] = [
             ('1', '1'),
             ('2', '4'),
