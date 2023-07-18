@@ -122,7 +122,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
 
     char output[1000000] = "";
 
-    const int path_length = 13 + (int)((ceil(log10(submission_id)) + 1));
+    const int path_length = 14 + (int)((ceil(log10(submission_id)) + 1));
     const int testpath_input_length = path_length + (int)((ceil(log10(test_case_id)) + 1)) + 11;
 
     char testpath_input[testpath_input_length]; //..._input.txt
@@ -194,7 +194,6 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         sprintf(command, "%s < %s", code_path, testpath_input);
 
         file_output = popen(command, "r");
-
 
     } else {
 
