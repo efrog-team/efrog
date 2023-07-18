@@ -3,7 +3,7 @@
 
     function sample() {
         if (document.getElementById('language').value == 'Python 3 (3.10)') {
-            document.getElementById('code').value = 'print(int(input()))';
+            document.getElementById('code').value = 'print(int(input()) ** 2)';
         }
         else if (document.getElementById('language').value == 'C++ 17 (g++ 11.2)') {
             document.getElementById('code').value = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}';
