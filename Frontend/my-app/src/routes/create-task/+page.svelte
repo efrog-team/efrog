@@ -1,7 +1,7 @@
 <script>
     let test_amount = 1;
     let save = [];
-    let test = [];
+    let tests = [];
     let files;
 
     function resize(_e) {
@@ -9,19 +9,20 @@
         let getElement = event.target || event.srcElement; 
         getElement.style.height = "92px"; 
         getElement.style.height = Math.max(getElement.scrollHeight, getElement.offsetHeight)+"px"
+        console.log(1)
     }
     function create_test (){
-        test = save;
+        tests = save;
         if (document.getElementById("tests_amount").value != null){
             test_amount = Number(document.getElementById("tests_amount").value);
         }
         for(let i = 0; i <test_amount; i++){
-        test = test.concat({id: i + 1});
+        tests = tests.concat({id: i + 1});
         }
-        console.log(test);
+        console.log(tests);
     }
 	 function send() {
-
+        console.log(1)
      }
 </script>
 
@@ -155,7 +156,7 @@
                     <p>Обсяг пам'яті</p>
                     <input type="text" id="memory_limit">
                     <p>Кількість тестів</p>
-                    <input type="text" id="tests_amount" value="{test_amount}" on:change={create_test}>
+                    <input type="text" id="tests_amount"  on:change={create_test}>
                 </div>
                 <div style="display: inline; float:left; margin-bottom:15px;">                
                     <p>Умова</p>
@@ -173,7 +174,7 @@
                     <p class="test_font">Вихідні дані</p>
                     <p class="test_font">Статус тесту</p>
                 </div>
-                {#each test as test}
+                {#each tests as test}
                     <div class="test">
                         <p class="number">{test.id}</p>
                         <textarea name="input_value" id="input_value" class="test_area"></textarea>
@@ -184,7 +185,7 @@
                         </select>
                     </div>
                 {/each}
-                <input bind:files id="many" multiple type="file" class="submit_button" value="Завантажити файлом" >
+                <input bind:files id="many" multiple type="file" class="submit_button">
                 <input type="submit" id="submit" value="Відправити" class="submit_button" style="margin-right: 0;" on:submit={send}>
             </form> 
         </div>
