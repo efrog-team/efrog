@@ -2,6 +2,7 @@
     /*let id = 1;*/
     let name = "Task 1";
     let point = 0;
+    let answers = []
 
     function change_code() {
         point = 0
@@ -20,9 +21,7 @@
         };
         socket.onmessage = function(event) {
             let message = event.data;
-            let messageElem = document.createElement('div');
-            messageElem.textContent = message;
-            document.getElementById('answer').append(messageElem);
+            answers.append(message);
         };
         socket.onclose = function() {
             document.getElementById('submit').disabled = false;
@@ -113,7 +112,6 @@
             <button on:click={change_res}>Результати</button>
             <hr>
             {#if point === 0}
-                <form on:submit={sent_form}>
                     <p>Мова програмування</p>
                     <select name="language" id="language">
                         <option value="Python 3 (3.10)">Python 3 (3.10)</option>
@@ -122,10 +120,12 @@
                     </select>
                     <p>Код</p>
                     <textarea type="text" name="code" id="code"></textarea><br>
-                    <input type="submit" id="submit" value="Відправити" class="submit_button">
-                </form>
+                    <button on:click={sent_form} class="submit_button">Відправити</button>
             {:else}
                 <div id="answer" class="tests">Відповідь сервера:</div>
+                {#each answers as answer}
+                    <p>{answer}</p>
+                {/each}
             {/if}
         </div>
     </div>
