@@ -30,7 +30,7 @@
     p{
         color:white;
         font-family: "e-Ukraine";
-        font-size: 24pt;
+        font-size: 22px;
     }
     input{
         outline: none;
@@ -42,7 +42,7 @@
         margin-top: 7px;
         margin-bottom: 44px;
         color: white;
-        font-size: 24pt;
+        font-size: 22px;
         font-family: "e-Ukraine";
         display:flex;
     }
@@ -54,7 +54,7 @@
         width: 53vw;
         height: 100px;
         color: white;
-        font-size: 24pt;
+        font-size: 22px;
         font-family: "e-Ukraine";
         resize: none;
         display:flex;
@@ -90,7 +90,7 @@
         width: 25vw;
         height: 60px;
         color: white;
-        font-size: 24pt;
+        font-size: 22px;
         font-family: "e-Ukraine";
         resize: none;
         display:flex;
@@ -102,7 +102,7 @@
         width: 25vw;
         height: 60px;
         color: white;
-        font-size: 24pt;
+        font-size: 22px;
         font-family: "e-Ukraine";
         resize: none;
         display:flex;
@@ -124,7 +124,7 @@
         display:inline;
         float: left;
         color: white;
-        font-size: 24pt;
+        font-size: 22px;
         font-family: "e-Ukraine";
         text-align: center;
     }
