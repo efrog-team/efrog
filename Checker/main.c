@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <stdbool.h>
-#include <time.h>
 
 int DEBUG = 1;
 
@@ -111,7 +110,7 @@ struct Result
                    4 - Time limit
                    5 - Memory limit
                    6 - Internal error */      
-    double time;
+    int time;
     int memory;
     char *output;
     char *description;
@@ -119,14 +118,11 @@ struct Result
 
 struct Result *check_test_case(int submission_id, int test_case_id, char *language, char *input, char *solution) {
 
-    double cpu_time;
-    clock_t start_time, end_time;
-
     struct Result *result = malloc(sizeof(struct Result));
 
     char output[1000000] = "";
 
-    const int path_length = 13 + (int)((ceil(log10(submission_id)) + 1));
+    const int path_length = 14 + (int)((ceil(log10(submission_id)) + 1));
     const int testpath_input_length = path_length + (int)((ceil(log10(test_case_id)) + 1)) + 11;
 
     char testpath_input[testpath_input_length]; //..._input.txt
@@ -182,12 +178,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
         
         char command[2 * path_length + testpath_input_length - 2]; 
-
-        start_time = clock();
-
         sprintf(command, "python3 %s < %s", code_path, testpath_input);
-
-        end_time = clock();
 
         file_output = popen(command, "r");
 
@@ -200,12 +191,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         sprintf(code_path, "checker_files/%d/%d", submission_id, submission_id);
 
         char command[code_path_length + testpath_input_length + 3]; 
-
-        start_time = clock();
-
         sprintf(command, "%s < %s", code_path, testpath_input);
-
-        end_time = clock();
 
         file_output = popen(command, "r");
 
@@ -220,8 +206,6 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         return result;
 
     }
-
-    cpu_time = (double)((((double) (end_time - start_time)) / CLOCKS_PER_SEC) * 1000);
 
     file_solution = fopen(testpath_solution, "r");
 
@@ -290,7 +274,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     pclose(file_output);
 
     result->status = status;
-    result->time = cpu_time;
+    result->time = 0;
     result->memory = 0;
     result->output = output;
     result->description = "";
@@ -303,14 +287,13 @@ int main() {
 
     DEBUG = 1;
 
-    create_files(12312365, "for i in range(1_000_000_000):\n    pass\nnum = int(input())\nprint(f\"{num // 10} {num % 10}\")", "Python 3 (3.10)");
-    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "99", "9 9");
+    create_files(12312365, "print(int(input()) ** 2)", "Python 3 (3.10)");
+    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "20", "400");
     delete_files(12312365);
 
-    printf("status: %d\noutput: %stime : %f ms\n", result->status, result->output, result->time);
+    printf("status: %d\noutput: %s", result->status, result->output);
     return 0;
 
 }
-
 
 
