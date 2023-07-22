@@ -23,7 +23,7 @@ double get_time() {
 
 int create_files(int submission_id, char *code, char *language) {
 
-    const int path_length = 14 + (int)((ceil(log10(submission_id)) + 1));
+    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
     char path[path_length]; 
 
     sprintf(path, "checker_files/%d", submission_id);
@@ -40,7 +40,7 @@ int create_files(int submission_id, char *code, char *language) {
     
     if (strcmp(language, "Python 3 (3.10)") == 0) {
 
-        char code_path[path_length + (int)((ceil(log10(submission_id)) + 1)) + 4]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
+        char code_path[path_length + (int)((floor(log10(submission_id)) + 2)) + 4]; // path_length + (int)((floor(log10(submission_id)) + 2)) + 4 (/.py)
         sprintf(code_path, "%s/%d.py", path, submission_id);
 
         file_code = fopen(code_path, "w");
@@ -57,7 +57,7 @@ int create_files(int submission_id, char *code, char *language) {
 
     } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) { //cpp and c
         bool cpp = strcmp(language, "C++ 17 (g++ 11.2)") == 0; //c++
-        int code_path_length = path_length + (int)((ceil(log10(submission_id)) + 1)) + 5;
+        int code_path_length = path_length + (int)((floor(log10(submission_id)) + 2)) + 5;
         char code_path[code_path_length]; 
         sprintf(code_path, cpp ? "%s/%d.cpp" : "%s/%d.c", path, submission_id);
         file_code = fopen(code_path, "w");
@@ -89,7 +89,7 @@ int create_files(int submission_id, char *code, char *language) {
 }
 
 int delete_files(int submission_id) {
-    const int path_length = 14 + (int)((ceil(log10(submission_id)) + 1));
+    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
 
     char dir_path[path_length];
     sprintf(dir_path, "checker_files/%d", submission_id);
@@ -133,8 +133,8 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
 
     char output[1000000] = "";
 
-    const int path_length = 14 + (int)((ceil(log10(submission_id)) + 1));
-    const int testpath_input_length = path_length + (int)((ceil(log10(test_case_id)) + 1)) + 11;
+    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
+    const int testpath_input_length = path_length + (int)((floor(log10(test_case_id)) + 2)) + 11;
 
     char testpath_input[testpath_input_length]; //..._input.txt 
     char testpath_output[testpath_input_length + 1]; //..._output.txt
@@ -200,10 +200,10 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
 
         int command_status;
 
-        char code_path[path_length + (int)((ceil(log10(submission_id)) + 1)) + 4]; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 4 (/.py)
+        char code_path[path_length + (int)((floor(log10(submission_id)) + 2)) + 4]; // path_length + (int)((floor(log10(submission_id)) + 2)) + 4 (/.py)
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
         
-        char command[path_length + 2 * testpath_input_length +  (int)((ceil(log10(submission_id)) + 1)) + 19]; 
+        char command[path_length + 2 * testpath_input_length +  (int)((floor(log10(submission_id)) + 2)) + 19]; 
 
         sprintf(command, "python3 %s < %s > %s", code_path, testpath_input, testpath_output);
 
@@ -216,7 +216,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) {
 
         int command_status;
-        int code_path_length = path_length + (int)((ceil(log10(submission_id)) + 1)) + 1; // path_length + (int)((ceil(log10(submission_id)) + 1)) + 1 :(/) :)))))))))))))))))))))))))))))))))
+        int code_path_length = path_length + (int)((floor(log10(submission_id)) + 2)) + 1; // path_length + (int)((floor(log10(submission_id)) + 2)) + 1 :(/) :)))))))))))))))))))))))))))))))))
 
         char code_path[code_path_length]; 
         sprintf(code_path, "checker_files/%d/%d", submission_id, submission_id);
