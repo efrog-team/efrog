@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-int DEBUG = 1;
+int DEBUG = 0;
 
 
 double get_time() {

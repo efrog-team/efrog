@@ -9,7 +9,7 @@
 #include <dirent.h>
 #include <stdbool.h>
 
-int DEBUG = 1;
+int DEBUG = 0;
 
 int create_files(int submission_id, char *code, char *language) {
 
