@@ -138,7 +138,7 @@
         <div id="header" class="header">
             <div style="display: inline; float:left; margin-top: 6px; margin-left: 15px;"><a href="\main"><img src="logo.png" class="menu_photo" alt=" "></a></div>
             <div style="display: inline; float:right; margin-top: 6px;"><a href="\for-user"><img src="favicon.png" class="menu_photo" alt=" "></a></div>
-            <div style="display: inline; float:right; margin-top: 50px;">   
+            <div style="display: inline; float:right; margin-top: 30px;">   
                 <a href="\finding-task" class="menu_text">Задачі</a>
                 <a href="\olimpiad" class="menu_text">Олімпіади</a>
             </div>

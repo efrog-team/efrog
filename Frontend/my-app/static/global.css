@@ -27,7 +27,7 @@ body{
 .header{
     background-color: rgb(33, 121, 45);
     border-bottom: 5px solid rgb(20, 55, 27);
-    height: 112px;
+    height: 80px;
 }
 
 .menu_text{
@@ -41,7 +41,7 @@ body{
 }
 
 .menu_photo{
-    height: 100px;
+    height: 70px;
     display:inline-block;
     margin:auto;
 }
