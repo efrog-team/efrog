@@ -17,11 +17,10 @@
             socket.send(document.getElementById("language").value);
             /*socket.send(id);*/
             document.getElementById('submit').disabled = true;
-            document.getElementById('answer').innerHTML = 'Відповідь сервера:';
         };
         socket.onmessage = function(event) {
             let message = event.data;
-            answers.append(message);
+            answers.push(message);
         };
         socket.onclose = function() {
             document.getElementById('submit').disabled = false;
@@ -120,7 +119,7 @@
                     </select>
                     <p>Код</p>
                     <textarea type="text" name="code" id="code"></textarea><br>
-                    <button on:click={sent_form} class="submit_button">Відправити</button>
+                    <button on:click={sent_form} class="submit_button" id="submit">Відправити</button>
             {:else}
                 <div id="answer" class="tests">Відповідь сервера:</div>
                 {#each answers as answer}
