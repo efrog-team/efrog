@@ -1,1 +1,2 @@
-a = 12
+a = int(input())
+print(a ** 2)

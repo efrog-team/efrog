@@ -8,7 +8,10 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <stdbool.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include <time.h>
+#include <sys/resource.h>
 
 int DEBUG = 0;
 
@@ -19,11 +22,14 @@ double get_time() {
     return (double)time.tv_sec + (double)time.tv_nsec * 1e-6;
 }
 
+int getbytes(int num) {
+    return (int)((floor(log10(num)) + 2));
+}
 
 
 int create_files(int submission_id, char *code, char *language) {
 
-    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
+    const int path_length = 14 + getbytes(submission_id);
     char path[path_length]; 
 
     sprintf(path, "checker_files/%d", submission_id);
@@ -40,7 +46,7 @@ int create_files(int submission_id, char *code, char *language) {
     
     if (strcmp(language, "Python 3 (3.10)") == 0) {
 
-        char code_path[path_length + (int)((floor(log10(submission_id)) + 2)) + 4]; // path_length + (int)((floor(log10(submission_id)) + 2)) + 4 (/.py)
+        char code_path[path_length + getbytes(submission_id) + 4]; // path_length + getbytes(submission_id) + 4 (/.py)
         sprintf(code_path, "%s/%d.py", path, submission_id);
 
         file_code = fopen(code_path, "w");
@@ -57,7 +63,7 @@ int create_files(int submission_id, char *code, char *language) {
 
     } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) { //cpp and c
         bool cpp = strcmp(language, "C++ 17 (g++ 11.2)") == 0; //c++
-        int code_path_length = path_length + (int)((floor(log10(submission_id)) + 2)) + 5;
+        int code_path_length = path_length + getbytes(submission_id) + 5;
         char code_path[code_path_length]; 
         sprintf(code_path, cpp ? "%s/%d.cpp" : "%s/%d.c", path, submission_id);
         file_code = fopen(code_path, "w");
@@ -89,7 +95,7 @@ int create_files(int submission_id, char *code, char *language) {
 }
 
 int delete_files(int submission_id) {
-    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
+    const int path_length = 14 + getbytes(submission_id);
 
     char dir_path[path_length];
     sprintf(dir_path, "checker_files/%d", submission_id);
@@ -121,20 +127,22 @@ struct Result
                    5 - Memory limit
                    6 - Internal error */      
     int time; //ms
+    int cpu_time;
     int memory;
     char *output;
     char *description;
 };
 
 struct Result *check_test_case(int submission_id, int test_case_id, char *language, char *input, char *solution) {
-    int res_c_time;
+    int time, cpu_time;//ms
+    int memory; //KB
     double start, end;
     struct Result *result = malloc(sizeof(struct Result));
 
     char output[1000000] = "";
 
-    const int path_length = 14 + (int)((floor(log10(submission_id)) + 2));
-    const int testpath_input_length = path_length + (int)((floor(log10(test_case_id)) + 2)) + 11;
+    const int path_length = 14 + getbytes(submission_id);
+    const int testpath_input_length = path_length + getbytes(test_case_id) + 11;
 
     char testpath_input[testpath_input_length]; //..._input.txt 
     char testpath_output[testpath_input_length + 1]; //..._output.txt
@@ -155,6 +163,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         if(DEBUG) printf("file_input = NULL\n");
         result->status = 6;
         result->time = 0;
+        result->cpu_time = 0;
         result->memory = 0;
         result->output = "";
         result->description = "";
@@ -172,6 +181,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         if(DEBUG) printf("file_solution = NULL\n");
         result->status = 6;
         result->time = 0;
+        result->cpu_time = 0;
         result->memory = 0;
         result->output = "";
         result->description = "";
@@ -189,6 +199,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         if(DEBUG) printf("file_output = NULL\n");
         result->status = 6;
         result->time = 0;
+        result->cpu_time = 0;
         result->memory = 0;
         result->output = "";
         result->description = "";
@@ -198,25 +209,52 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     
     if (strcmp(language, "Python 3 (3.10)") == 0) {
 
-        int command_status;
-
-        char code_path[path_length + (int)((floor(log10(submission_id)) + 2)) + 4]; // path_length + (int)((floor(log10(submission_id)) + 2)) + 4 (/.py)
+        char code_path[path_length + getbytes(submission_id) + 4]; // path_length + getbytes(submission_id) + 4 (/.py)
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
-        
-        char command[path_length + 2 * testpath_input_length +  (int)((floor(log10(submission_id)) + 2)) + 19]; 
 
-        sprintf(command, "python3 %s < %s > %s", code_path, testpath_input, testpath_output);
+        struct rusage usage;
 
-        start = get_time();
-        system(command);
-        end = get_time();
 
-        res_c_time = ceil(end - start);
+        pid_t pid = fork();
+
+        if (pid == 0) {
+            //child process
+
+            freopen(testpath_input, "r", stdin);
+            freopen(testpath_output, "w", stdout);
+            
+            char *args[] = {"python3", code_path, NULL};
+            execvp("python3", args);
+
+        } else if (pid > 0) {
+            //parent process
+
+            int status;
+
+            start = get_time();
+            wait(&status);
+            end = get_time();
+
+            time = (int)ceil(end - start);
+            getrusage(RUSAGE_CHILDREN, &usage);
+            cpu_time = usage.ru_utime.tv_usec / 1000;
+            memory = usage.ru_maxrss;
+
+        } else {
+            if (DEBUG) printf("failed to create child process");
+            result->status = 6;
+            result->time = 0;
+            result->cpu_time = 0;
+            result->memory = 0;
+            result->output = "";
+            result->description = "";
+            return result;
+        }
+
         
     } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) {
 
-        int command_status;
-        int code_path_length = path_length + (int)((floor(log10(submission_id)) + 2)) + 1; // path_length + (int)((floor(log10(submission_id)) + 2)) + 1 :(/) :)))))))))))))))))))))))))))))))))
+        int code_path_length = path_length + getbytes(submission_id) + 1; // path_length + getbytes(submission_id) + 1 :(/) :)))))))))))))))))))))))))))))))))
 
         char code_path[code_path_length]; 
         sprintf(code_path, "checker_files/%d/%d", submission_id, submission_id);
@@ -228,16 +266,18 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         start = get_time();
         system(command);
         end = get_time();
-        res_c_time = ceil(end - start);
+        time = ceil(end - start);
 
     } else {
 
         if (DEBUG) printf("unknown language");
         result->status = 6;
         result->time = 0;
+        result->cpu_time = 0;
         result->memory = 0;
         result->output = "";
         result->description = "";
+
         return result;
 
     }
@@ -316,8 +356,9 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     
     
     result->status = status;
-    result->time = res_c_time;
-    result->memory = 0;
+    result->time = time;
+    result->cpu_time = cpu_time;
+    result->memory = memory;
     result->output = output;
     result->description = "";
 
@@ -329,12 +370,19 @@ int main() {
 
     DEBUG = 1;
 
-    //create_files(12312365, "num = int(input())\nprint(f\"{num // 10} {num % 10}\")\n", "Python 3 (3.10)");
-    create_files(12312365, "#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int a;\n    cin >> a;\n    cout << a * a;\n    return 0;\n}", "C++ 17 (g++ 11.2)");
-    struct Result *result = check_test_case(12312365, 123123, "C++ 17 (g++ 11.2)", "9", "81");
+    create_files(12312365, "num = int(input())\nprint(f\"{num // 10} {num % 10}\")\n", "Python 3 (3.10)");
+    //create_files(12312365, "#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int a;\n    cin >> a;\n    cout << a * a;\n    return 0;\n}", "C++ 17 (g++ 11.2)");
+    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "99", "9 9");
     delete_files(12312365);
 
-    printf("status: %d\noutput: %s time: %dms\n", result->status, result->output, result->time);
+    printf("status: %d\noutput: %stime: %dms\ncpu_time: %dms\nmemory: %dKB\n", 
+
+    result->status, 
+    result->output, 
+    result->time, 
+    result->cpu_time, 
+    result->memory);
+
     return 0;
 
 }
