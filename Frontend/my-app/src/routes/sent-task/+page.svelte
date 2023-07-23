@@ -2,19 +2,23 @@
     /*let id = 1;*/
     let name = "Task 1";
     let point = 0;
-    let answers = []
+    let answers = [];
+    let amount_answers = 0;
+    let code = "";
+    let language = "Python 3 (3.10)";
+
 
     function change_code() {
-        point = 0
+        point = 0;
     }
     function change_res() {
-        point = 1
+        point = 1;
     }
     function sent_form() {
         let socket = new WebSocket("ws://localhost:8000/task");
         socket.onopen = function() {
-            socket.send(document.getElementById("code").value);
-            socket.send(document.getElementById("language").value);
+            socket.send(code);
+            socket.send(language);
             /*socket.send(id);*/
             document.getElementById('submit').disabled = true;
         };
@@ -25,7 +29,15 @@
         socket.onclose = function() {
             document.getElementById('submit').disabled = false;
         };
-    }
+    } 
+    /*$: if (amount_answers < answers.length)  {
+        let answerElem = document.createElement('div');
+        answerElem.textContent = answers[amount_answers];
+        document.getElementById('answer').prepend(answerElem);
+        amount_answers = answers.length;
+        console.log(1)
+    }*/
+
 </script>
 
 <style>
@@ -112,13 +124,13 @@
             <hr>
             {#if point === 0}
                     <p>Мова програмування</p>
-                    <select name="language" id="language">
+                    <select name="language" id="language" bind:value={language}>
                         <option value="Python 3 (3.10)">Python 3 (3.10)</option>
                         <option value="C++ 17 (g++ 11.2)">C++ 17 (g++ 11.2)</option>
                         <option value="C 17 (gcc 11.2)">C 17 (gcc 11.2)</option>
                     </select>
                     <p>Код</p>
-                    <textarea type="text" name="code" id="code"></textarea><br>
+                    <textarea type="text" name="code" id="code" bind:value={code}></textarea><br>
                     <button on:click={sent_form} class="submit_button" id="submit">Відправити</button>
             {:else}
                 <div id="answer" class="tests">Відповідь сервера:</div>
