@@ -15,11 +15,35 @@
 
 int DEBUG = 0;
 
+struct timespec time_diff(struct timespec start, struct timespec end) {
 
-double get_time() {
-    struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    return (double)time.tv_sec + (double)time.tv_nsec * 1e-6;
+    struct timespec temp;
+
+    if ((end.tv_nsec - start.tv_nsec) < 0) {
+
+        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+        temp.tv_nsec = 1e9 + end.tv_nsec - start.tv_nsec;
+
+    } else {
+
+        temp.tv_sec = end.tv_sec - start.tv_sec;
+        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+
+    }
+
+    return temp;
+
+}
+
+int get_diff(struct timespec start, struct timespec end) {
+
+    int diff;
+
+    struct timespec res = time_diff(start, end);
+
+    diff = (int)ceil(res.tv_sec * 1e3 + res.tv_nsec / 1e6);
+
+    return diff;
 }
 
 int getbytes(int num) {
@@ -133,11 +157,88 @@ struct Result
     char *description;
 };
 
+int execute(
+    const char *file, 
+    char **args, 
+    const char *testpath_input,
+    const char *testpath_output,
+    const char *code_path,
+    struct Result *result) { 
+
+    /*define for error:*/
+
+    result->status = 6;
+    result->time = 0;
+    result->cpu_time = 0;
+    result->memory = 0;
+    result->output = "";
+    result->description = "";
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+
+        /*-------------------------------child process-------------------------------*/
+
+        freopen(testpath_input, "r", stdin);
+        freopen(testpath_output, "w", stdout);
+                
+        execvp(file, args);
+    } else if (pid > 0) {
+
+        /*-------------------------------parent process-------------------------------*/
+
+        struct rusage usage1, usage2;
+        int status;
+
+        getrusage(RUSAGE_CHILDREN, &usage1);
+
+        struct timespec start, end;
+        
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+        wait(&status);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+
+        int time = get_diff(start, end);
+
+        getrusage(RUSAGE_CHILDREN, &usage2);
+
+        int cpu_time = usage2.ru_utime.tv_usec / 1000 - usage1.ru_utime.tv_usec / 1000;
+        int memory = usage2.ru_maxrss - usage1.ru_maxrss;
+
+        //space to check for error types!!!
+
+        result->time = time;
+        result->cpu_time = cpu_time;
+        result->memory = memory;
+
+        return 0;
+
+    } else {
+
+        if (DEBUG) printf("failed to create child process");
+        result->status = 6;
+        result->time = 0;
+        result->cpu_time = 0;
+        result->memory = 0;
+        result->output = "";
+        result->description = "";
+        return 1; //error
+        
+    }
+
+}
+
 struct Result *check_test_case(int submission_id, int test_case_id, char *language, char *input, char *solution) {
-    int time, cpu_time;//ms
-    int memory; //KB
-    double start, end;
+
     struct Result *result = malloc(sizeof(struct Result));
+    result->status = 6; // define for error
+    result->time = 0; 
+    result->cpu_time = 0;
+    result->memory = 0;
+    result->output = "";
+    result->description = "";
+    //struct Result result = {6, 0, 0, 0, "", ""}; // define for error
 
     char output[1000000] = "";
 
@@ -161,12 +262,6 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     if (file_input == NULL) {
 
         if(DEBUG) printf("file_input = NULL\n");
-        result->status = 6;
-        result->time = 0;
-        result->cpu_time = 0;
-        result->memory = 0;
-        result->output = "";
-        result->description = "";
         return result;
         
     }
@@ -179,12 +274,6 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     if (file_solution == NULL) {
 
         if(DEBUG) printf("file_solution = NULL\n");
-        result->status = 6;
-        result->time = 0;
-        result->cpu_time = 0;
-        result->memory = 0;
-        result->output = "";
-        result->description = "";
         return result;
 
     }
@@ -197,60 +286,30 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     if (file_solution == NULL) {
 
         if(DEBUG) printf("file_output = NULL\n");
-        result->status = 6;
-        result->time = 0;
-        result->cpu_time = 0;
-        result->memory = 0;
-        result->output = "";
-        result->description = "";
         return result;
 
     }
-    
+
     if (strcmp(language, "Python 3 (3.10)") == 0) {
 
         char code_path[path_length + getbytes(submission_id) + 4]; // path_length + getbytes(submission_id) + 4 (/.py)
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
 
-        struct rusage usage;
+        char *file = "python3";
+        char *args[] = {file, code_path, NULL};
 
+        int exec_status = execute(
+            file, 
+            args, 
+            testpath_input, 
+            testpath_output, 
+            code_path, 
+            result);
 
-        pid_t pid = fork();
-
-        if (pid == 0) {
-            //child process
-
-            freopen(testpath_input, "r", stdin);
-            freopen(testpath_output, "w", stdout);
-            
-            char *args[] = {"python3", code_path, NULL};
-            execvp("python3", args);
-
-        } else if (pid > 0) {
-            //parent process
-
-            int status;
-
-            start = get_time();
-            wait(&status);
-            end = get_time();
-
-            time = (int)ceil(end - start);
-            getrusage(RUSAGE_CHILDREN, &usage);
-            cpu_time = usage.ru_utime.tv_usec / 1000;
-            memory = usage.ru_maxrss;
-
-        } else {
-            if (DEBUG) printf("failed to create child process");
-            result->status = 6;
-            result->time = 0;
-            result->cpu_time = 0;
-            result->memory = 0;
-            result->output = "";
-            result->description = "";
+        if (exec_status == 1) {
+            if (DEBUG) printf("failed in child process");
             return result;
         }
-
         
     } else if (strcmp(language, "C++ 17 (g++ 11.2)") == 0 || strcmp(language, "C 17 (gcc 11.2)") == 0) {
 
@@ -259,25 +318,27 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         char code_path[code_path_length]; 
         sprintf(code_path, "checker_files/%d/%d", submission_id, submission_id);
 
-        char command[code_path_length + testpath_input_length + testpath_input_length + 7]; 
+        char *file = code_path;
+        char *args[] = {file, NULL};
 
-        sprintf(command, "%s < %s > %s", code_path, testpath_input, testpath_output);
+        int exec_status = execute(
+                    file, 
+                    args, 
+                    testpath_input, 
+                    testpath_output, 
+                    code_path, 
+                    result);
 
-        start = get_time();
-        system(command);
-        end = get_time();
-        time = ceil(end - start);
+        if (exec_status == 1) {
+
+            if (DEBUG) printf("failed in child process");
+            return result;
+
+        }
 
     } else {
 
         if (DEBUG) printf("unknown language");
-        result->status = 6;
-        result->time = 0;
-        result->cpu_time = 0;
-        result->memory = 0;
-        result->output = "";
-        result->description = "";
-
         return result;
 
     }
@@ -353,14 +414,8 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
     fclose(file_solution);      
     pclose(file_output);
 
-    
-    
     result->status = status;
-    result->time = time;
-    result->cpu_time = cpu_time;
-    result->memory = memory;
     result->output = output;
-    result->description = "";
 
     return result;
     
@@ -370,22 +425,20 @@ int main() {
 
     DEBUG = 1;
 
-    create_files(12312365, "num = int(input())\nprint(f\"{num // 10} {num % 10}\")\n", "Python 3 (3.10)");
-    //create_files(12312365, "#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int a;\n    cin >> a;\n    cout << a * a;\n    return 0;\n}", "C++ 17 (g++ 11.2)");
-    struct Result *result = check_test_case(12312365, 123123, "Python 3 (3.10)", "99", "9 9");
+    //create_files(12312365, "num = int(input())\nprint(f\"{num // 10} {num % 10}\")\n", "Python 3 (3.10)");
+    create_files(12312365, "#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int a;\n    cin >> a;\n    cout << a * a;\n    return 0;\n}", "C++ 17 (g++ 11.2)");
+    struct Result *result = check_test_case(12312365, 123123, "C++ 17 (g++ 11.2)", "99", "9 9");
     delete_files(12312365);
 
-    printf("status: %d\noutput: %stime: %dms\ncpu_time: %dms\nmemory: %dKB\n", 
-
-    result->status, 
-    result->output, 
-    result->time, 
-    result->cpu_time, 
-    result->memory);
+    printf(
+        "status: %d\noutput: %stime: %dms\ncpu_time: %dms\nmemory: %dKB\n", 
+        result->status, 
+        result->output, 
+        result->time, 
+        result->cpu_time, 
+        result->memory);
 
     return 0;
 
 }
-
-
 
