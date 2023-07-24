@@ -102,8 +102,8 @@ int create_files(int submission_id, char *code, char *language) {
         fprintf(file_code, "%s", code);
         fclose(file_code);
 
-        char compile_command[11 +  2 * code_path_length]; //g++-11 main.cpp -o main len : 7 +  2 * code_path_length
-        sprintf(compile_command, cpp ? "g++-11 %s -o %s/%d" : "gcc-11 %s -lm -o %s/%d", code_path, path, submission_id); 
+        char compile_command[26 +  2 * code_path_length]; //g++-11 -static -s main.cpp -o main len : 23 (26 including -lm) +  2 * code_path_length
+        sprintf(compile_command, cpp ? "g++-11 -static -s %s -o %s/%d" : "gcc-11 -static -s %s -lm -o %s/%d", code_path, path, submission_id); 
         int status = system(compile_command); 
         if (status == 1) { 
             if (DEBUG) printf("failed to compile (cpp)\n");
