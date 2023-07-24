@@ -12,10 +12,11 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <sys/resource.h>
+#include <fcntl.h>
 
 int DEBUG = 0;
 
-struct timespec time_diff(struct timespec start, struct timespec end) {
+struct timespec time_diff_timespec(struct timespec start, struct timespec end) {
 
     struct timespec temp;
 
@@ -35,13 +36,44 @@ struct timespec time_diff(struct timespec start, struct timespec end) {
 
 }
 
-int get_diff(struct timespec start, struct timespec end) {
+struct timeval time_diff_timeval(struct timeval start, struct timeval end) {
+
+    struct timeval temp;
+
+    if ((end.tv_usec - start.tv_usec) < 0) {
+
+        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+        temp.tv_usec = 1e6 + end.tv_usec - start.tv_usec;
+
+    } else {
+
+        temp.tv_sec = end.tv_sec - start.tv_sec;
+        temp.tv_usec = end.tv_usec - start.tv_usec;
+
+    }
+
+    return temp;
+
+}
+
+int get_diff_timespec(struct timespec start, struct timespec end) {
 
     int diff;
 
-    struct timespec res = time_diff(start, end);
+    struct timespec res = time_diff_timespec(start, end);
 
     diff = (int)ceil(res.tv_sec * 1e3 + res.tv_nsec / 1e6);
+
+    return diff;
+}
+
+int get_diff_timeval(struct timeval start, struct timeval end) {
+
+    int diff;
+
+    struct timeval res = time_diff_timeval(start, end);
+
+    diff = (int)ceil(res.tv_sec * 1e3 + res.tv_usec / 1e3);
 
     return diff;
 }
@@ -174,19 +206,40 @@ int execute(
     result->output = "";
     result->description = "";
 
+    int input_fd = open(testpath_input, O_RDONLY);
+    if (input_fd == -1) {
+        if (DEBUG) printf("failed to open input file");
+        return 1;
+    }
+
+    int output_fd = open(testpath_output, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    if (output_fd == -1) {
+        close(input_fd);
+        if (DEBUG) printf("failed to open output file");
+        return 1;
+    }
+
     pid_t pid = fork();
 
     if (pid == 0) {
 
         /*-------------------------------child process-------------------------------*/
 
-        freopen(testpath_input, "r", stdin);
-        freopen(testpath_output, "w", stdout);
+        // freopen(testpath_input, "r", stdin);
+        // freopen(testpath_output, "w", stdout);
+
+        dup2(input_fd, STDIN_FILENO);
+        dup2(output_fd, STDOUT_FILENO);
+        close(input_fd);
+        close(output_fd);
                 
-        execvp(file, args);
+        execv(file, args);
     } else if (pid > 0) {
 
         /*-------------------------------parent process-------------------------------*/
+
+        close(input_fd);
+        close(output_fd);
 
         struct rusage usage1, usage2;
         int status;
@@ -196,14 +249,15 @@ int execute(
         struct timespec start, end;
         
         clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-        wait(&status);
+        waitpid(pid, &status, 0);
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
-        int time = get_diff(start, end);
+        int time = get_diff_timespec(start, end);
 
         getrusage(RUSAGE_CHILDREN, &usage2);
 
-        int cpu_time = usage2.ru_utime.tv_usec / 1000 - usage1.ru_utime.tv_usec / 1000;
+        // int cpu_time = usage2.ru_utime.tv_usec / 1000 - usage1.ru_utime.tv_usec / 1000;
+        int cpu_time = get_diff_timeval(usage1.ru_utime, usage2.ru_utime);
         int memory = usage2.ru_maxrss - usage1.ru_maxrss;
 
         //space to check for error types!!!
@@ -295,7 +349,7 @@ struct Result *check_test_case(int submission_id, int test_case_id, char *langua
         char code_path[path_length + getbytes(submission_id) + 4]; // path_length + getbytes(submission_id) + 4 (/.py)
         sprintf(code_path, "checker_files/%d/%d.py", submission_id, submission_id);
 
-        char *file = "python3";
+        char *file = "/usr/bin/python3";
         char *args[] = {file, code_path, NULL};
 
         int exec_status = execute(
