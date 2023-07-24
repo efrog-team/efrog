@@ -1,20 +1,14 @@
 <script>
+
     /*let id = 1;*/
     let name = "Task 1";
-    let point = 0;
-    let answers = [];
-    let amount_answers = 0;
     let code = "";
     let language = "Python 3 (3.10)";
 
-
-    function change_code() {
-        point = 0;
-    }
-    function change_res() {
-        point = 1;
-    }
     function sent_form() {
+        let tests = document.querySelector("input");
+        tests.setAttribute("checked", "checked")
+
         let socket = new WebSocket("ws://localhost:8000/task");
         socket.onopen = function() {
             socket.send(code);
@@ -24,20 +18,15 @@
         };
         socket.onmessage = function(event) {
             let message = event.data;
-            answers.push(message);
+            let messageElem = document.createElement('div');
+            messageElem.textContent = message;
+            document.getElementById('answer').append(messageElem);
         };
         socket.onclose = function() {
             document.getElementById('submit').disabled = false;
         };
-    } 
-    /*$: if (amount_answers < answers.length)  {
-        let answerElem = document.createElement('div');
-        answerElem.textContent = answers[amount_answers];
-        document.getElementById('answer').prepend(answerElem);
-        amount_answers = answers.length;
-        console.log(1)
-    }*/
 
+    } 
 </script>
 
 <style>
@@ -96,10 +85,24 @@
         font-family: "e-Ukraine";
         text-align: center;
     }
-    .tests{
-        color:white;
-        font-family: "e-Ukraine";
-        font-size: 22px;
+    .tests {
+        display: none;
+    }
+    .tests + label {
+        display: block;
+    }
+    .tests + label + div {
+        display: none;
+    }
+    .tests:checked + label + div {
+        display: block;
+        padding:5px;    
+        outline: none; 
+        border: none; 
+        color:white; 
+        font-family: "e-Ukraine"; 
+        font-size: 22px; 
+        background-color: rgb(41, 44, 51);
     }
 </style>
 
@@ -119,25 +122,20 @@
         </div>
         <div style="padding: 3vw; padding-top: 0;">
             <p style="font-size: 32px;">{name}</p>
-            <button on:click={change_code}>Код</button>
-            <button on:click={change_res}>Результати</button>
-            <hr>
-            {#if point === 0}
-                    <p>Мова програмування</p>
-                    <select name="language" id="language" bind:value={language}>
-                        <option value="Python 3 (3.10)">Python 3 (3.10)</option>
-                        <option value="C++ 17 (g++ 11.2)">C++ 17 (g++ 11.2)</option>
-                        <option value="C 17 (gcc 11.2)">C 17 (gcc 11.2)</option>
-                    </select>
-                    <p>Код</p>
-                    <textarea type="text" name="code" id="code" bind:value={code}></textarea><br>
-                    <button on:click={sent_form} class="submit_button" id="submit">Відправити</button>
-            {:else}
-                <div id="answer" class="tests">Відповідь сервера:</div>
-                {#each answers as answer}
-                    <p>{answer}</p>
-                {/each}
-            {/if}
+            <p>Мова програмування</p>
+            <select name="language" id="language" bind:value={language}>
+                <option value="Python 3 (3.10)">Python 3 (3.10)</option>
+                <option value="C++ 17 (g++ 11.2)">C++ 17 (g++ 11.2)</option>
+                <option value="C 17 (gcc 11.2)">C 17 (gcc 11.2)</option>
+            </select>
+            <p>Код</p>
+            <textarea type="text" name="code" id="code" bind:value={code}></textarea>
+
+            <input class="tests" id="tests" type="checkbox">
+            <label for="tests"><p>Результати</p></label>
+            <div id="answer">Відповідь сервера:</div>
+
+            <button on:click={sent_form} class="submit_button" id="submit">Відправити</button>
         </div>
     </div>
 </main>
