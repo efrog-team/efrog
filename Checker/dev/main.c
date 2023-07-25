@@ -243,18 +243,18 @@ int execute(
 
         struct rusage usage1, usage2;
         int status;
+        struct timespec start, end;
 
         getrusage(RUSAGE_CHILDREN, &usage1);
 
-        struct timespec start, end;
         
         clock_gettime(CLOCK_MONOTONIC_RAW, &start);
         waitpid(pid, &status, 0);
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
-        int time = get_diff_timespec(start, end);
-
         getrusage(RUSAGE_CHILDREN, &usage2);
+
+        int time = get_diff_timespec(start, end);
 
         // int cpu_time = usage2.ru_utime.tv_usec / 1000 - usage1.ru_utime.tv_usec / 1000;
         int cpu_time = get_diff_timeval(usage1.ru_utime, usage2.ru_utime);
