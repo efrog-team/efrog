@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.concurrency import run_in_threadpool
 from database.users_teams_members import create_user as create_user_db, get_user as get_user_db, get_and_check_user_by_token as get_user_by_token_db, update_user as update_user_db
 from database.users_teams_members import create_team as create_team_db, activate_deactivate_team as activate_deactivate_team_db, check_if_team_can_be_deleted as check_if_team_can_be_deleted_db, delete_team as delete_team_db
 from database.users_teams_members import create_team_memeber as create_team_memeber_db, get_team_members_by_team_name as get_team_members_db, confirm_team_member as confirm_team_member_db
@@ -10,9 +9,25 @@ from models import User, UserRequest, UserToken, UserRequestUpdate, TeamRequest,
 from security.hash import hash_hex
 from security.jwt import encode_token
 from typing import Annotated
-from checker_connection import compile_lib, get_lib
-from ctypes import CDLL
-import os
+from checker_connection import Library, Result
+from asyncio import get_running_loop, AbstractEventLoop
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from typing import Callable
+
+loop: AbstractEventLoop = get_running_loop()
+fs_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=1)
+checker_executor: ProcessPoolExecutor = ProcessPoolExecutor(max_workers=2)
+
+lib: Library = Library()
+
+def create_files_wrapper(*args: ...) -> int:
+    return lib.create_files(*args)
+
+def check_test_case_wrapper(*args: ...) -> Result:
+    return lib.check_test_case(*args)
+
+def delete_files_wrapper(*args: ...) -> int:
+    return lib.delete_files(*args)
 
 app: FastAPI = FastAPI()
 
@@ -23,9 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-compile_lib()
-lib: CDLL = get_lib()
 
 @app.get("/")
 def root() -> str:
@@ -295,7 +307,7 @@ async def websocket_endpoint(websocket: WebSocket):
     code: str = await websocket.receive_text()
     language: str = await websocket.receive_text()
     await websocket.send_text(f"Your request is recieved")
-    if await run_in_threadpool(lib.create_files, submission_id, code.encode('utf-8'), language.encode('utf-8')) == 0:
+    if await loop.run_in_executor(fs_executor, create_files_wrapper, submission_id, code, language) == 0:
         await websocket.send_text(f"Saved succesfully")
         if language == 'C++ 17 (g++ 11.2)' or language == 'C 17 (gcc 11.2)':
             await websocket.send_text(f"Compiled succesfully")
@@ -310,19 +322,36 @@ async def websocket_endpoint(websocket: WebSocket):
         count: int = 1
         correct: int = 0
         for test_case in test_cases:
-            match (await run_in_threadpool(lib.check_test_case, submission_id, count, language.encode('utf-8'), test_case[0].encode('utf-8'), test_case[1].encode('utf-8'))).contents.status:
+            result: Result = (await loop.run_in_executor(checker_executor, check_test_case_wrapper, submission_id, count, language, test_case[0], test_case[1]))
+            match result.status:
                 case 0:
-                    await websocket.send_text(f"Test case #{count}: Correct answer")
+                    await websocket.send_text(f"Test case #{count}: Correct answer in {result.time}ms ({result.cpu_time}ms)")
                     correct += 1
                 case 1:
-                    await websocket.send_text(f"Test case #{count}: Wrong answer")
+                    await websocket.send_text(f"Test case #{count}: Wrong answer in {result.time}ms ({result.cpu_time}ms)")
                 case 6:
                     await websocket.send_text(f"Test case #{count}: Internal error")
                 case _:
                     await websocket.send_text(f"Test case #{count}: Unexpected error")
             count += 1
         await websocket.send_text(f"Total result: {correct}/{count - 1}")
-        await run_in_threadpool(lib.delete_files, submission_id)
     else:
         await websocket.send_text(f"Error in compilation or file creating occured")
+    fs_executor.submit(delete_files_wrapper, submission_id)
     await websocket.close()
+
+@app.get("/test-submit")
+async def test_submit(id: int, language: str) -> str:
+    if language == 'C++ 17 (g++ 11.2)':
+        code: str = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}'
+    if language == 'C 17 (gcc 11.2)':
+        code: str = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("lld", &a);\n    printf("%lld", a * a);\n}'
+    elif language == 'Python 3 (3.10)':
+        code: str = 'print(int(input()) ** 2)'
+    else:
+        code: str = ''
+    if await loop.run_in_executor(fs_executor, create_files_wrapper, id, code, language) == 0:
+        result: Result = await loop.run_in_executor(checker_executor, check_test_case_wrapper, id, id, language, '1', '1')
+        fs_executor.submit(delete_files_wrapper, id)
+        return f"{result.time}ms ({result.cpu_time}ms)"
+    return 'Error'
