@@ -79,7 +79,9 @@ int get_diff_timeval(struct timeval start, struct timeval end) {
 }
 
 int getbytes(int num) {
+
     return (int)((floor(log10(num)) + 2));
+
 }
 
 
@@ -138,7 +140,7 @@ int create_files(int submission_id, char *code, char *language) {
         sprintf(compile_command, cpp ? "g++-11 -static -s %s -o %s/%d" : "gcc-11 -static -s %s -lm -o %s/%d", code_path, path, submission_id); 
         int status = system(compile_command); 
         if (status == 1) { 
-            if (DEBUG) printf("failed to compile (cpp)\n");
+            if (DEBUG) printf("failed to compile (cpp)\n"); //compilling error
         }
 
     } else {
@@ -207,16 +209,22 @@ int execute(
     result->description = "";
 
     int input_fd = open(testpath_input, O_RDONLY);
+
     if (input_fd == -1) {
+
         if (DEBUG) printf("failed to open input file");
         return 1;
+
     }
 
     int output_fd = open(testpath_output, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+
     if (output_fd == -1) {
+
         close(input_fd);
         if (DEBUG) printf("failed to open output file");
         return 1;
+
     }
 
     pid_t pid = fork();
@@ -230,10 +238,12 @@ int execute(
 
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
+
         close(input_fd);
         close(output_fd);
                 
         execv(file, args);
+
     } else if (pid > 0) {
 
         /*-------------------------------parent process-------------------------------*/
