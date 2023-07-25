@@ -345,7 +345,7 @@ async def test_submit(id: int, language: str) -> str:
     if language == 'C++ 17 (g++ 11.2)':
         code: str = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}'
     if language == 'C 17 (gcc 11.2)':
-        code: str = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("lld", &a);\n    printf("%lld", a * a);\n}'
+        code: str = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("%lld", &a);\n    printf("%lld", a * a);\n}'
     elif language == 'Python 3 (3.10)':
         code: str = 'print(int(input()) ** 2)'
     else:
