@@ -342,14 +342,15 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/test-submit")
 async def test_submit(id: int, language: str) -> str:
-    if language == 'C++ 17 (g++ 11.2)':
-        code: str = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}'
-    if language == 'C 17 (gcc 11.2)':
-        code: str = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("%lld", &a);\n    printf("%lld", a * a);\n}'
-    elif language == 'Python 3 (3.10)':
-        code: str = 'print(int(input()) ** 2)'
-    else:
-        code: str = ''
+    match language:
+        case 'C++ 17 (g++ 11.2)':
+            code: str = '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a;\n    cin >> a;\n    cout << a * a;\n}'
+        case 'C 17 (gcc 11.2)':
+            code: str = '#include <stdio.h>\n\nint main() {\n    long long a;\n    scanf("%lld", &a);\n    printf("%lld", a * a);\n}'
+        case 'Python 3 (3.10)':
+            code: str = 'print(int(input()) ** 2)'
+        case _:
+            return 'Error'
     if await loop.run_in_executor(fs_executor, create_files_wrapper, id, code, language) == 0:
         result: Result = await loop.run_in_executor(checker_executor, check_test_case_wrapper, id, id, language, '1', '1')
         fs_executor.submit(delete_files_wrapper, id)
