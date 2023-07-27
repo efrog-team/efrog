@@ -143,7 +143,7 @@ def get_team_members(team_name: str, only_confirmed: bool) -> dict[str, list[dic
             'username': team_member.username,
             'email': team_member.email,
             'name': team_member.name,
-            'confirmed': str(bool(team_member.confirmed))
+            'confirmed': str(team_member.confirmed)
         })
     return {
         'team_members': res

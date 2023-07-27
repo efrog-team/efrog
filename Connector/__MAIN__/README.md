@@ -2,6 +2,16 @@
 
 ## Requests
 
+* ### GET "/" — root directory
+    * Request headers:
+        * empty
+    * Request body:
+        * empty
+    * Request parameters:
+        * empty
+    * Response body:
+        * "This is a root endpoint of the API"
+
 * ### POST "/users" — create a user
     * Request headers:
         * empty
@@ -51,6 +61,19 @@
         * email: string
         * name: string
 
+* ### PUT "/users/{username}" — update a user
+    * Request headers:
+        * Authroization: string (access token)
+    * Request body:
+        * username: string?
+        * email: string?
+        * name: string?
+        * password: string?
+    * Request parameters:
+        * username: string
+    * Response body:
+        * empty
+
 * ### POST "/teams" — create a team
     * Request headers:
         * Authroization: string (access token)
@@ -58,6 +81,46 @@
         * empty
     * Request body:
         * name: string
+    * Response body:
+        * empty
+
+* ### PUT "/teams/{team_name}/activate" — activate a team
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * team_name: string
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### PUT "/teams/{team_name}/deactivate" — deactivate a team
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * team_name: string
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### GET "/teams/{team_name}/check-if-can-be-deleted" — check if a team can be deleted
+    * Request headers:
+        * empty
+    * Request parameters:
+        * team_name: string
+    * Request body:
+        * empty
+    * Response body:
+        * can: string
+
+* ### DELETE "/teams/{team_name}" — delete a team
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * team_name: string
+    * Request body:
+        * empty
     * Response body:
         * empty
 
@@ -84,7 +147,7 @@
             * username: string
             * email: string
             * name: string
-            * confirmed: boolean
+            * confirmed: integer (0(no) or 1(yes))
             } ]
 
 * ### PUT "/teams/{team_name}/members/{team_member_username}/confirm" — confirm a team member
@@ -93,8 +156,199 @@
     * Request parameters:
         * team_name: string
         * team_member_username: string
-        * only_comfirmed: boolean
     * Request body:
         * empty
     * Response body:
         * empty
+
+* ### POST "/problems" — create a problem
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * empty
+    * Request body:
+        * name: string
+        * statement: string
+        * private: integer (0(no) or 1(yes))
+    * Response body:
+        * empty
+
+* ### GET "/problems/{problem_id}" — get a problem
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * id: integer
+        * author_user_id: integer
+        * name: string
+        * statement: string
+        * private: integer (0(no) or 1(yes))
+
+* ### PUT "/problems/{problem_id}/make-public" — make a problem public
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### PUT "/problems/{problem_id}/make-private" — make a problem private
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### GET "/problems/{problem_id}/check-if-can-be-edited" — check if a problem can be edited
+    * Request headers:
+        * empty
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * can: string
+
+* ### PUT "/problems/{problem_id}" — update a problem
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * name: string?
+        * statement: string?
+    * Response body:
+        * empty
+
+* ### DELETE "/problems/{problem_id}" — delete a problem
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### POST "/problems/{problem_id}/test-cases" — create a test case
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * id: integer
+        * problem_id: integer
+        * input: string
+        * solution: string
+        * time_restriction: integer
+        * memory_restriction: integer
+        * opened: integer (0(no) or 1(yes))
+    * Response body:
+        * empty
+
+* ### GET "/problems/{problem_id}/test-cases/{test_case_id}" — get a test case
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+        * test_case_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * input: string
+        * solution: string
+        * time_restriction: integer
+        * memory_restriction: integer
+        * opened: integer (0(no) or 1(yes))
+
+* ### GET "/problems/{problem_id}/test-cases" — get test cases
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * test_cases: array[ {
+            * id: integer
+            * problem_id: integer
+            * input: string
+            * solution: string
+            * time_restriction: integer
+            * memory_restriction: integer
+            * opened: integer (0(no) or 1(yes))
+        } ]
+
+* ### PUT "/problems/{problem_id}/test-cases/{test_case_id}/make-opened" — make a test case opened
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+        * test_case_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### PUT "/problems/{problem_id}/test-cases/{test_case_id}/make-closed" — make a test case closed
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+        * test_case_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### PUT "/problems/{problem_id}/test-cases/{test_case_id}" — update a test case
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+        * test_case_id: integer
+    * Request body:
+        * input: string?
+        * solution: string?
+        * time_restriction: integer?
+        * memory_restriction: integer?
+    * Response body:
+        * empty
+
+* ### DELETE "/problems/{problem_id}/test-cases/{test_case_id}" — delete a test case
+    * Request headers:
+        * Authroization: string (access token)
+    * Request parameters:
+        * problem_id: integer
+        * test_case_id: integer
+    * Request body:
+        * empty
+    * Response body:
+        * empty
+
+* ### WS "/task" — temporary websocket request to send a solution on the test problem about the square of the number
+    * First message to the server:
+        * Code for the problem
+    * Second message to the server:
+        * Language
+    * Each message from the server:
+        * Result from the testing system
+
+* ### GET "/test-submit?id={id}&language={language}" — temporary request to send a solution on the test problem about the square of the number and the code checks just one test case
+    * Request headers:
+        * empty
+    * Request parameters:
+        * empty
+    * Request body:
+        * id: integer
+        * language: string
+    * Response body:
+        * "{result_time}ms ({result_cpu_time}ms)" or "Error"
