@@ -12,7 +12,6 @@ from typing import Annotated
 from checker_connection import Library, Result
 from asyncio import get_running_loop, AbstractEventLoop
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from typing import Callable
 
 loop: AbstractEventLoop = get_running_loop()
 fs_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=1)
