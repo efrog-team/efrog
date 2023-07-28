@@ -1,0 +1,9 @@
+[submodule "Front-end"]
+	path = Front-end
+	url = https://github.com/efrog-team/efrog-front-end
+[submodule "Back-end"]
+	path = Back-end
+	url = https://github.com/efrog-team/efrog-back-end
+[submodule "Task creator"]
+	path = Task creator
+	url = https://github.com/efrog-team/efrog-task-creator

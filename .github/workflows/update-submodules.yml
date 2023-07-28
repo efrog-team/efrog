@@ -1,0 +1,25 @@
+name: Update submodules
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+
+      - name: Commit & push changes
+        run: |
+          git config  --global user.email "140815341+efrog-bot@users.noreply.github.com"
+          git config --global user.name "efrog-bot"
+          git commit -am "Update submodules"
+          git push
