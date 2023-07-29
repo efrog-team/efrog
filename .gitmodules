@@ -4,6 +4,6 @@
 [submodule "Back-end"]
 	path = Back-end
 	url = https://github.com/efrog-team/efrog-back-end
-[submodule "Task creator"]
-	path = Task creator
-	url = https://github.com/efrog-team/efrog-task-creator
+[submodule "Hub"]
+	path = Hub
+	url = https://github.com/efrog-team/efrog-hub
