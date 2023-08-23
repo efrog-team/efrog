@@ -7,3 +7,6 @@
 [submodule "Hub"]
 	path = Hub
 	url = https://github.com/efrog-team/efrog-hub
+[submodule "Auth"]
+	path = Auth
+	url = https://github.com/efrog-team/efrog-auth
